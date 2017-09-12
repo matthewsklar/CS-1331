@@ -12,7 +12,7 @@ public class PgnReader {
 	    e.printStackTrace();
 	}
 	
-	tagValue("Event", pgn);
+	System.out.println(tagValue("Event", pgn));
     }
 
     /*
@@ -24,15 +24,22 @@ public class PgnReader {
      * @return A String containing the value of the tag with the given name in the pgn file.
      * If the tag is not found, it returns the String "NOT GIVEN".
      */
-    public static void tagValue(String name, String pgn) {
+    public static String tagValue(String name, String pgn) {
 	name = "[" + name;
 	
-	int startIndex = pgn.indexOf(name) + name.length() + 2;
+	int startIndex = pgn.indexOf(name);
+
+	if (startIndex == -1) {
+	    return "NOT GIVEN";
+	}
+
+	startIndex += name.length() + 2;
+	
 	int endIndex = pgn.indexOf("]", startIndex) - 1;
 
 	String value = pgn.substring(startIndex, endIndex);
 
-	return value
+	return value;
     }
 
     public static void finalPosition(String pgn) {
