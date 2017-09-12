@@ -20,12 +20,19 @@ public class PgnReader {
      *
      * @param name The name of the tag
      * @param pgn The pgn file
-     *q
+     *
      * @return A String containing the value of the tag with the given name in the pgn file.
      * If the tag is not found, it returns the String "NOT GIVEN".
      */
     public static void tagValue(String name, String pgn) {
-	System.out.println(pgn);
+	name = "[" + name;
+	
+	int startIndex = pgn.indexOf(name) + name.length() + 2;
+	int endIndex = pgn.indexOf("]", startIndex) - 1;
+
+	String value = pgn.substring(startIndex, endIndex);
+
+	return value
     }
 
     public static void finalPosition(String pgn) {
