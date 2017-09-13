@@ -2,6 +2,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class PgnReader {
+    public static String[][] boardState;
+    
     // http://cs1331.gatech.edu/fall2017/hw1/hw1-pgn-reader.html
     public static void main(String[] args) {
         String pgn = "";
@@ -57,8 +59,10 @@ public class PgnReader {
      * file.
      */
     public static String finalPosition(String pgn) {
-	String[][] boardState = createBoardState();
+	boardState = createBoardState();
+	
 	moves(pgn);
+	
 	return "TODO: Complete this";
     }
 
@@ -72,14 +76,14 @@ public class PgnReader {
      */
     public static String[][] createBoardState() {
 	String[][] boardState = {
-	    {"Rw", "Bw", "Nw", "Qw", "Kw", "Nw", "Kw", "Rw"},
-	    {"Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw"},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"Rb", "Nb", "Bb", "Qb", "Kb", "Bb", "Nb", "Rb"},
 	    {"Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb"},
-	    {"Rb", "Bb", "Nb", "Qb", "Kb", "Nb", "Kb", "Rb"},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw"},
+	    {"Rw", "Nw", "Bw", "Qw", "Kw", "Bw", "Nw", "Rw"}
 	};
 
 	return boardState;
@@ -118,8 +122,8 @@ public class PgnReader {
     /**
      * Obtain information from algebraic notation of move.
      *
-     * @param move A String containing the algebraic notation of the move.
-     * @param color A char containingc the color of the piece moved: 'w' = white; 'b' = black.
+     * @param move The algebraic notation of the move.
+     * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
 	char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0) : 'P';
@@ -142,7 +146,7 @@ public class PgnReader {
 	int endRank = move.charAt(startIndex) - 48; // TODO: -49 if starts at 0
 
 	
-	int startFile = startPosition(piece, color, endFile, endRank, start);
+	int startFile = getStartPosition(piece, color, endFile, endRank, start);
 	
 	// System.out.println("" + piece + start + (capture ? "x" : "")  + endFile + endRank);
     }
@@ -150,7 +154,7 @@ public class PgnReader {
     /**
      *
      */
-    public static int startPosition(char piece, char color, int endFile, int endRank, char start) { // TODO: Return tuple of position
+    public static int getStartPosition(char piece, char color, int endFile, int endRank, char start) { // TODO: Return tuple of position
 	int startFile = 0;
 	int startRank = 0;
 
@@ -163,7 +167,7 @@ public class PgnReader {
 	}
 
 	if (piece == 'P') {
-	    
+	    int[][] piecePositions = getPiecePositions(piecePlusColor, startFile, startRank);
 	} else if (piece == 'R') {
 
 	} else if (piece == 'B') {
@@ -177,5 +181,45 @@ public class PgnReader {
 	}
 
 	return 0;
+    }
+
+    /**
+     * Get the positions of instances of piece. If start exists
+     * then only get instances of the piece that fit the start position.
+     *
+     * @param piece The piece to get the positions of in the format Pc.
+     * @param startFile The start file if it is already known.
+     * @param startRank The start rank if it is already known.
+     *
+     * @return A double integer array containing each the rank and file 
+     * for every position of the piece.
+     */
+    public static int[][] getPiecePositions(String piece, int startFile, int startRank) {
+	// TODO: Take into account starting position if it matters
+	int numPiecePos = 0;
+	
+	for (String[] rank: boardState) {
+	    for (String square: rank) {
+		if (square.equals(piece)) {
+		    numPiecePos++;
+		}
+	    }
+	}
+
+	int[][] piecePos = new int[numPiecePos][2];
+	int pieceIndex = 0;
+
+	for (int r = 0; r < boardState.length; r++) {
+	    for (int f = 0; f < boardState[r].length; f++) {
+		if (boardState[r][f].equals(piece)) {
+		    piecePos[pieceIndex][0] = r;
+		    piecePos[pieceIndex][1] = f;
+
+		    pieceIndex++;
+		}
+	    }
+	}
+
+	return null;
     }
 }
