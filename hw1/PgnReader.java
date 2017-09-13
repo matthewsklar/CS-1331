@@ -76,19 +76,47 @@ public class PgnReader {
      */
     public static String[][] createBoardState() {
 	String[][] boardState = {
-	    {"Rb", "Nb", "Bb", "Qb", "Kb", "Bb", "Nb", "Rb"},
-	    {"Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb"},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
-	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"Rw", "Nw", "Bw", "Qw", "Kw", "Bw", "Nw", "Rw"},
 	    {"Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw"},
-	    {"Rw", "Nw", "Bw", "Qw", "Kw", "Bw", "Nw", "Rw"}
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
+	    {"Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb"},
+	    {"Rb", "Nb", "Bb", "Qb", "Kb", "Bb", "Nb", "Rb"}
 	};
 
 	return boardState;
     }
 
+    /**
+     * Update boardState by moving the piece to its new location.
+     *
+     * @param piece The piece that is being moved in the form Pc.
+     * @param startFile The piece's file (x-axis) before moving.
+     * @param startRank The piece's rank (y-axis) before moving.
+     * @param endFile The piece's file (x-axis) after moving.
+     * @param endRank The piece's rank (y-axis) after moving.
+     */
+    public static void move(String piece, int startFile, int startRank, int endFile, int endRank) {
+	boardState[startRank][startFile] = "  ";
+	boardState[endRank][endFile] = piece;
+    }
+    
+    /**
+     * Get the status of the square on the board.
+     *
+     * @param file The file (x-axis) of the board.
+     * @param rank The rank (y-axis) of the board.
+     *
+     * @return A string representing the value of the piece on the square.
+     * "  " = no piece
+     * "Pc" = Piece color
+     */
+    public static String getBoardStateSquare(int file, int rank) {
+	return boardState[rank][file];
+    }
+    
     /**
      * Determine the moves in the chess game based on the pgn.
      * Individually send the moves to be handled.
@@ -143,18 +171,17 @@ public class PgnReader {
 	}
 
        	int endFile = move.charAt(startIndex++) - 97;
-	int endRank = move.charAt(startIndex) - 48; // TODO: -49 if starts at 0
-
+	int endRank = move.charAt(startIndex) - 49;
 	
-	int startFile = getStartPosition(piece, color, endFile, endRank, start);
+	int startFile = getStartPosition(piece, color, endFile, endRank, start, capture);
 	
-	// System.out.println("" + piece + start + (capture ? "x" : "")  + endFile + endRank);
+	// System.out.println("" + piece + start nnn+ (capture ? "x" : "")  + endFile + endRank);
     }
 
     /**
      *
      */
-    public static int getStartPosition(char piece, char color, int endFile, int endRank, char start) { // TODO: Return tuple of position
+    public static int getStartPosition(char piece, char color, int endFile, int endRank, char start, boolean capture) {
 	int startFile = 0;
 	int startRank = 0;
 
@@ -167,9 +194,12 @@ public class PgnReader {
 	}
 
 	if (piece == 'P') {
-	    int[][] piecePositions = getPiecePositions(piecePlusColor, startFile, startRank);
-	} else if (piece == 'R') {
+	    int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
 
+	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+	} else if (piece == 'R') {
+	    
 	} else if (piece == 'B') {
 
 	} else if (piece == 'N') {
@@ -212,10 +242,37 @@ public class PgnReader {
 	for (int r = 0; r < boardState.length; r++) {
 	    for (int f = 0; f < boardState[r].length; f++) {
 		if (boardState[r][f].equals(piece)) {
-		    piecePos[pieceIndex][0] = r;
-		    piecePos[pieceIndex][1] = f;
+		    piecePos[pieceIndex][0] = f;
+		    piecePos[pieceIndex][1] = r;
 
 		    pieceIndex++;
+		}
+	    }
+	}
+
+	return piecePos;
+    }
+
+    /**
+     * 
+     */
+    public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
+	if (capture) {
+	    return null;
+	}
+	
+	for (int[] pos: piecePos) {
+	    if (pos[0] == endFile) {
+		if (Math.abs(endRank - pos[1]) == 2) {
+		    if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
+			int[] startPos = {endFile, (endRank + pos[1]) / 2};
+
+			return startPos;
+		    }
+
+		    int[] startPos = {endFile, pos[1]};
+
+		    return startPos;
 		}
 	    }
 	}
