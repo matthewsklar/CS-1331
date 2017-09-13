@@ -4,7 +4,7 @@ import java.nio.file.Paths;
 public class PgnReader {
     // http://cs1331.gatech.edu/fall2017/hw1/hw1-pgn-reader.html
     public static void main(String[] args) {
-        String pgn = "NOT GIVEN";
+        String pgn = "";
 
         try {
             pgn = new String(Files.readAllBytes(Paths.get(args[0])));
@@ -45,9 +45,7 @@ public class PgnReader {
 
         int endIndex = pgn.indexOf("]", startIndex) - 1;
 
-        String value = pgn.substring(startIndex, endIndex);
-
-        return value;
+        return pgn.substring(startIndex, endIndex);
     }
 
     /**
