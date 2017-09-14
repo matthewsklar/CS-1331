@@ -124,7 +124,7 @@ public class PgnReader {
      * @param pgn The pgn file.
      */
     public static void moves(String pgn) {
-	String pgnMoves = pgn.substring(pgn.indexOf("1. "));
+	String pgnMoves = pgn.substring(pgn.indexOf("1."));
 
 	int currentMove = 1;
 	int moveIndex = pgnMoves.indexOf(currentMove + ". ");
@@ -173,7 +173,7 @@ public class PgnReader {
        	int endFile = move.charAt(startIndex++) - 97;
 	int endRank = move.charAt(startIndex) - 49;
 	
-	int startFile = getStartPosition(piece, color, endFile, endRank, start, capture);
+	int[] startPos = getStartPosition(piece, color, endFile, endRank, start, capture);
 	
 	// System.out.println("" + piece + start nnn+ (capture ? "x" : "")  + endFile + endRank);
     }
@@ -181,7 +181,7 @@ public class PgnReader {
     /**
      *
      */
-    public static int getStartPosition(char piece, char color, int endFile, int endRank, char start, boolean capture) {
+    public static int[] getStartPosition(char piece, char color, int endFile, int endRank, char start, boolean capture) {
 	int startFile = 0;
 	int startRank = 0;
 
@@ -193,24 +193,33 @@ public class PgnReader {
 	    startRank = start;
 	}
 
+	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
+	
 	if (piece == 'P') {
-	    int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
-
 	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+
+	    System.out.println(startPos[0] + ", " + startPos[1]);
+	    
+	    return startPos;
 	} else if (piece == 'R') {
 	    
 	} else if (piece == 'N') {
 
 	} else if (piece == 'B') {
-	    
+	    int[] startPos = getBishopStart(piecePos, endFile, endRank);
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+
+	    System.out.println(startPos[0] + ", " + startPos[1]);
+
+	    return startPos;
 	} else if (piece == 'Q') {
 
 	} else if (piece == 'K') {
 
 	}
 
-	return 0;
+	return null;
     }
 
     /**
@@ -265,7 +274,7 @@ public class PgnReader {
      * @param endRank The rank of the pawn after moving.
      * @param capture If the pawn is capturing a piece.
      *
-     * @return An integer array storing the position of the pawn that will be moved.
+     * @return An integer array storing the starting position of the pawn that will be moved.
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
@@ -292,37 +301,27 @@ public class PgnReader {
     }
 
     /**
+     * Handle the movement of bishops. Determine if the bishop to be moved is dark 
+     * squared or light squared using modulo on the end square and find the bishop 
+     * that matches.
      *
-     */
-    public static int[] getRookStart(int[][] piecePos, char color, int endFile, int endRank) {
-
-    }
-
-    /**
+     * @param piecePos The positions of all bishops of the correct color.
+     * @param endFile The file of the bishop after moving.
+     * @param endRank The rank of the bishop after moving.
      *
+     * @return An integer array storing the starting position of the bishop that will be moved.
      */
-    public static int[] getKnightStart(int[][] piecePos, char color, int endFile, int endRank) {
-	
-    }
+    public static int[] getBishopStart(int[][] piecePos, int endFile, int endRank) {
+	int bishopColor = ((endFile + 1) * (endRank + 1)) % 2;
 
-    /**
-     *
-     */
-    public static int[] getBishopStart(int[][] piecePos, char color, int endFile, int endRank) {
-       
-    }
+	for (int[] pos: piecePos) {
+	    if (((pos[0] + 1) * (pos[1] + 1)) % 2 == bishopColor) {
+		int[] startPos = {pos[0], pos[1]};
 
-    /**
-     *
-     */
-    public static int[] getQueenStart(int[][] piecePos, char color, int endFile, int endRank) {
+		return startPos;
+	    }
+	}
 
-    }
-
-    /**
-     *
-     */
-    public static int[] getKingStart(int[][] piecePos, char color, int endFile, int endRank) {
-
+	return null;
     }
 }
