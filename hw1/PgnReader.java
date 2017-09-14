@@ -101,6 +101,16 @@ public class PgnReader {
     public static void move(String piece, int startFile, int startRank, int endFile, int endRank) {
 	boardState[startRank][startFile] = "  ";
 	boardState[endRank][endFile] = piece;
+
+	System.out.println("");
+	
+	for (String[] i: boardState) {
+	    for (String j: i) {
+		System.out.print(j);
+	    }
+
+	    System.out.println("");
+	}
     }
     
     /**
@@ -199,29 +209,36 @@ public class PgnReader {
 	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
-	    System.out.println(startPos[0] + ", " + startPos[1]);
-	    
 	    return startPos;
 	} else if (piece == 'R') {
-	    
+	    int[] startPos = getRookStart(piecePos, endFile, endRank);
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+
+	    return startPos;
 	} else if (piece == 'N') {
 
 	} else if (piece == 'B') {
 	    int[] startPos = getBishopStart(piecePos, endFile, endRank);
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
-	    System.out.println(startPos[0] + ", " + startPos[1]);
-
 	    return startPos;
 	} else if (piece == 'Q') {
+	    int[] startPos = piecePos[0];
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
+	    return startPos;
 	} else if (piece == 'K') {
+	    int[] startPos = piecePos[0];
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
+	    return startPos;
 	}
 
 	return null;
     }
 
+    // TODO: Add support for specified start of position
+    
     /**
      * Get the positions of instances of piece. If start exists
      * then only get instances of the piece that fit the start position.
@@ -274,7 +291,7 @@ public class PgnReader {
      * @param endRank The rank of the pawn after moving.
      * @param capture If the pawn is capturing a piece.
      *
-     * @return An integer array storing the starting position of the pawn that will be moved.
+     * @return An integer array storing the position of the pawn that will be moved.
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
@@ -290,7 +307,7 @@ public class PgnReader {
 			return startPos;
 		    }
 
-		    int[] startPos = {endFile, pos[1]};
+		    int[] startPos = {pos[0], pos[1]};
 
 		    return startPos;
 		}
@@ -300,6 +317,66 @@ public class PgnReader {
 	return null;
     }
 
+    /**
+     * Handle the movement of rooks. Find the rook that shares the same end 
+     * file location. If it exists, check if there are any pieces on the same file
+     * on a rank between the start and end rank. If there is or if no rook is on the
+     * same file, check if the rook shares the same end rank location. If it does, check
+     * if there are any pieces on the same rank on a file between the start and end file.
+     *
+     * @param piecePos The positions of all rooks of the correct color.
+     * @param endFile The file of the rooks after moving.
+     * @param endRank The rank of the rooks after moving.
+     *
+     * @return An integer array storing the position of the rook that will be moved.
+     */
+    public static int[] getRookStart(int[][] piecePos, int endFile, int endRank) {
+	// TODO: If no specifed start rank or file
+	for (int[] pos: piecePos) {
+	    boolean correct = true;
+	    
+	    if (pos[0] == endFile) {
+		int direction = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
+		
+		for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
+		    if (getBoardStateSquare(endFile, Math.abs(r + direction * pos[1] + 1)) != "  ") {
+			correct = false;
+			
+			break;
+		    }
+		}
+
+		if (correct) {
+		    int[] startPos = {pos[0], pos[1]};
+		    
+		    return startPos;
+		}
+	    }
+
+	    if (pos[1] == endRank) {
+		correct = true;
+
+		int direction = (endFile - pos[0]) / Math.abs(endFile - pos[1]);
+
+		for (int f = 0; f < Math.abs(pos[0] - endFile) - 1; f++) {
+		    if (getBoardStateSquare(Math.abs(f + direction * pos[0] + 1), endRank) != "  ") {
+			correct = false;
+			
+			break;
+		    }
+		}
+
+		if (correct) {
+		    int[] startPos = {pos[0], pos[1]};
+		    
+		    return startPos;
+		}
+	    }
+	}
+
+	return null;
+    }
+    
     /**
      * Handle the movement of bishops. Determine if the bishop to be moved is dark 
      * squared or light squared using modulo on the end square and find the bishop 
