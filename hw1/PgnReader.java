@@ -226,7 +226,10 @@ public class PgnReader {
 
 	    return startPos;
 	} else if (piece == 'N') {
+	    int[] startPos = getRookStart(piecePos, endFile, endRank);
+	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
+	    return startPos;
 	} else if (piece == 'B') {
 	    int[] startPos = getBishopStart(piecePos, endFile, endRank);
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
@@ -449,6 +452,13 @@ public class PgnReader {
 	    }
 	}
 
+	return null;
+    }
+
+    /**
+     * 
+     */
+    public static int[] getKnightStart(int[][] piecePos, int endFile, int endRank) {
 	return null;
     }
     
