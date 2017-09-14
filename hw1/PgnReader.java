@@ -214,7 +214,10 @@ public class PgnReader {
 	
 	if (piece == 'P') {
 	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+	    move(piecePlusColor, startPos[0], startPos[1], startPos[2], startPos[3]);
+	    if (endRank != startPos[3]) {
+		move("  ", endFile, endRank, endFile, endRank);
+	    }
 
 	    return startPos;
 	} else if (piece == 'R') {
@@ -334,10 +337,11 @@ public class PgnReader {
     }
 
     /**
-     * Handle the movement of pawns. If it is a capture _______. If it isnt a capture, 
-     * check for a pawn on the same file. If the pawn is 2 spaces away, check if there
-     * is a pawn in the middle space, if there is one then that pawn is moved, otherwise
-     * the pawn 2 spaces away is moved.
+     * Handle the movement of pawns. If it is a capture determine direction of the capture
+     * and check if the pawn is in the correct position to capture. If no pawn is in 
+     * position, check for an en passant. If it isnt a capture, check for a pawn on the 
+     * same file. If the pawn is 2 spaces away, check if is a pawn in the middle
+     * space, if there is one then that pawn is moved, the pawn 2 spaces away is moved.
      *
      * @param piecePos The positions of all pawns of the correct color.
      * @param color The color of the pawns.
@@ -345,7 +349,8 @@ public class PgnReader {
      * @param endRank The rank of the pawn after moving.
      * @param capture If the pawn is capturing a piece.
      *
-     * @return An integer array storing the position of the pawn that will be moved.
+     * @return An integer array storing the position of the pawn that will be moved and its
+     * end position.
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
@@ -353,17 +358,17 @@ public class PgnReader {
 	    
 	    for (int[] pos: piecePos) {
 		if (endRank == pos[1] + direction) {
-		    int[] startPos = {pos[0], pos[1]};
+		    int[] posInfo = {pos[0], pos[1], endFile, endRank};
 
-		    return startPos;
+		    return posInfo;
 		}
 	    }
 
 	    for (int[] pos: piecePos) {
 		if (endRank == pos[1]) {
-		    int[] startPos = {pos[0], pos[1]};
+		    int[] posInfo = {pos[0], pos[1], endFile, pos[1] + direction};
 
-		    return startPos;
+		    return posInfo;
 		}
 	    }
 	}
@@ -372,14 +377,15 @@ public class PgnReader {
 	    if (pos[0] == endFile) {
        		if (Math.abs(endRank - pos[1]) == 2) {
 		    if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
-			int[] startPos = {endFile, (endRank + pos[1]) / 2};
+			int[] posInfo = {endFile, (endRank + pos[1]) / 2, endFile, endRank};
 
-			return startPos;
+			return posInfo;
 		    }
 		}
-		int[] startPos = {pos[0], pos[1]};
 
-		return startPos;
+		int[] posInfo = {pos[0], pos[1], endFile, endRank};
+
+		return posInfo;
 	    }
 	}
 
