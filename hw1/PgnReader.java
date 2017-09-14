@@ -389,10 +389,10 @@ public class PgnReader {
      * @return An integer array storing the starting position of the bishop that will be moved.
      */
     public static int[] getBishopStart(int[][] piecePos, int endFile, int endRank) {
-	int bishopColor = ((endFile + 1) * (endRank + 1)) % 2;
+	int bishopColor = (endFile + endRank) % 2;
 
 	for (int[] pos: piecePos) {
-	    if (((pos[0] + 1) * (pos[1] + 1)) % 2 == bishopColor) {
+	    if ((pos[0] + pos[1]) % 2 == bishopColor) {
 		int[] startPos = {pos[0], pos[1]};
 
 		return startPos;
