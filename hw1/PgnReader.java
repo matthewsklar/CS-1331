@@ -141,13 +141,20 @@ public class PgnReader {
 
 	while (moveIndex != -1) {
 	    currentMove++;
-
 	    int nextIndex = pgnMoves.indexOf(currentMove + ". ");
 
+	    int moveDigits = (int) Math.log10(currentMove - 1) + 1;
+
 	    if (nextIndex == -1) {
-	        processMove(pgnMoves.substring(moveIndex + 3), 'w');
+	        String[] moves = pgnMoves.substring(moveIndex + 2 + moveDigits).split(" ");
+
+		processMove(moves[0], 'w');
+
+		if (moves.length == 2) {
+		    processMove(moves[1], 'b');
+		}
 	    } else {
-		String moves[] = pgnMoves.substring(moveIndex + 3, nextIndex).split(" ");
+		String[] moves = pgnMoves.substring(moveIndex + 2 + moveDigits, nextIndex).split(" ");
 
 	        processMove(moves[0], 'w');
 		processMove(moves[1], 'b');
@@ -192,15 +199,15 @@ public class PgnReader {
      *
      */
     public static int[] getStartPosition(char piece, char color, int endFile, int endRank, char start, boolean capture) {
-	int startFile = 0;
-	int startRank = 0;
+	int startFile = -1;
+	int startRank = -1;
 
 	String piecePlusColor = Character.toString(piece) + Character.toString(color);
-	
+
 	if (Character.isLetter(start)) {
-	    startFile = start;
+	    startFile = start - 97;
 	} else if (Character.isDigit(start)) {
-	    startRank = start;
+	    startRank = start - 49;
 	}
 
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
@@ -253,6 +260,52 @@ public class PgnReader {
     public static int[][] getPiecePositions(String piece, int startFile, int startRank) {
 	// TODO: Take into account starting position if it matters
 	int numPiecePos = 0;
+
+	int[][] piecePos;
+	
+	if (startFile != -1) {
+	    for (int r = 0; r < 8; r++) {
+		if (getBoardStateSquare(startFile, r).equals(piece)) {
+		    numPiecePos++;
+		}
+	    }
+
+	    piecePos = new int[numPiecePos][2];
+
+	    int pieceIndex = 0;
+	    
+	    for (int rank = 0; rank < 8; rank++) {
+		if (getBoardStateSquare(startFile, rank).equals(piece)) {
+		    piecePos[pieceIndex][0] = startFile;
+		    piecePos[pieceIndex][1] = rank;
+
+		    pieceIndex++;
+		}
+	    }
+
+	    return piecePos;
+	} else if (startRank != -1) {
+	    for (int f = 0; f < 8; f++) {
+		if (getBoardStateSquare(startFile, f).equals(piece)) {
+		    numPiecePos++;
+		}
+
+		piecePos = new int[numPiecePos][2];
+
+		int pieceIndex = 0;
+	    
+		for (int file = 0; file < 8; file++) {
+		    if (getBoardStateSquare(file, startRank).equals(piece)) {
+			piecePos[pieceIndex][0] = file;
+			piecePos[pieceIndex][1] = startRank;
+
+			pieceIndex++;
+		    }
+		}
+
+		return piecePos;
+	    }
+	}
 	
 	for (String[] rank: boardState) {
 	    for (String square: rank) {
@@ -262,12 +315,13 @@ public class PgnReader {
 	    }
 	}
 
-	int[][] piecePos = new int[numPiecePos][2];
+	piecePos = new int[numPiecePos][2];
+
 	int pieceIndex = 0;
 
 	for (int r = 0; r < boardState.length; r++) {
 	    for (int f = 0; f < boardState[r].length; f++) {
-		if (boardState[r][f].equals(piece)) {
+		if (getBoardStateSquare(f, r).equals(piece)) {
 		    piecePos[pieceIndex][0] = f;
 		    piecePos[pieceIndex][1] = r;
 
@@ -295,22 +349,37 @@ public class PgnReader {
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
-	    return null;
+	    int direction = color == 'w' ? 1 : -1;
+	    
+	    for (int[] pos: piecePos) {
+		if (endRank == pos[1] + direction) {
+		    int[] startPos = {pos[0], pos[1]};
+
+		    return startPos;
+		}
+	    }
+
+	    for (int[] pos: piecePos) {
+		if (endRank == pos[1]) {
+		    int[] startPos = {pos[0], pos[1]};
+
+		    return startPos;
+		}
+	    }
 	}
 	
 	for (int[] pos: piecePos) {
 	    if (pos[0] == endFile) {
-		if (Math.abs(endRank - pos[1]) == 2) {
+       		if (Math.abs(endRank - pos[1]) == 2) {
 		    if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
 			int[] startPos = {endFile, (endRank + pos[1]) / 2};
 
 			return startPos;
 		    }
-
-		    int[] startPos = {pos[0], pos[1]};
-
-		    return startPos;
 		}
+		int[] startPos = {pos[0], pos[1]};
+
+		return startPos;
 	    }
 	}
 
