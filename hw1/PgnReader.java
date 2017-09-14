@@ -200,10 +200,10 @@ public class PgnReader {
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 	} else if (piece == 'R') {
 	    
-	} else if (piece == 'B') {
-
 	} else if (piece == 'N') {
 
+	} else if (piece == 'B') {
+	    
 	} else if (piece == 'Q') {
 
 	} else if (piece == 'K') {
@@ -254,7 +254,18 @@ public class PgnReader {
     }
 
     /**
-     * 
+     * Handle the movement of pawns. If it is a capture _______. If it isnt a capture, 
+     * check for a pawn on the same file. If the pawn is 2 spaces away, check if there
+     * is a pawn in the middle space, if there is one then that pawn is moved, otherwise
+     * the pawn 2 spaces away is moved.
+     *
+     * @param piecePos The positions of all pawns of the correct color.
+     * @param color The color of the pawns.
+     * @param endFile The file of the pawn after moving.
+     * @param endRank The rank of the pawn after moving.
+     * @param capture If the pawn is capturing a piece.
+     *
+     * @return An integer array storing the position of the pawn that will be moved.
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
@@ -278,5 +289,40 @@ public class PgnReader {
 	}
 
 	return null;
+    }
+
+    /**
+     *
+     */
+    public static int[] getRookStart(int[][] piecePos, char color, int endFile, int endRank) {
+
+    }
+
+    /**
+     *
+     */
+    public static int[] getKnightStart(int[][] piecePos, char color, int endFile, int endRank) {
+	
+    }
+
+    /**
+     *
+     */
+    public static int[] getBishopStart(int[][] piecePos, char color, int endFile, int endRank) {
+       
+    }
+
+    /**
+     *
+     */
+    public static int[] getQueenStart(int[][] piecePos, char color, int endFile, int endRank) {
+
+    }
+
+    /**
+     *
+     */
+    public static int[] getKingStart(int[][] piecePos, char color, int endFile, int endRank) {
+
     }
 }
