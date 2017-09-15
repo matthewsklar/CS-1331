@@ -143,18 +143,17 @@ public class PgnReader {
 	    startIndex = pgnMoves.indexOf(".", startIndex);
 	    int endIndex = pgnMoves.indexOf(".", startIndex + 1);
 
+	    String[] moves;
+	    
 	    if (endIndex == -1) {
-		String[] moves = pgnMoves.substring(startIndex + 1).trim().split(" ");
-
-		processMove(moves[0], 'w');
-
-		if (moves.length == 2) {
-		    processMove(moves[1], 'b');
-		}
+		moves = pgnMoves.substring(startIndex + 1).trim().split(" ");
 	    } else {
-		String[] moves = pgnMoves.substring(startIndex + 1, endIndex - 1).trim().split(" ");
+		moves = pgnMoves.substring(startIndex + 1, endIndex - 1).trim().split(" ");
+	    }
 
-		processMove(moves[0], 'w');
+	    processMove(moves[0], 'w');
+
+	    if (moves.length >= 2) {
 		processMove(moves[1], 'b');
 	    }
 
