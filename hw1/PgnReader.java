@@ -183,6 +183,9 @@ public class PgnReader {
 	int xIndex = move.indexOf('x');
 	boolean capture = xIndex != -1;
 
+	int promoteIndex = move.indexOf('=');
+	boolean promote = promoteIndex != -1;
+	
 	int startIndex = piece == 'P' ? 0 : 1;
 	char start = '\0';
 
@@ -194,13 +197,16 @@ public class PgnReader {
 	    startIndex = xIndex + 1;
 	}
 
+	String promotion = promote ? Character.toString(move.charAt(promoteIndex + 1)) + Character.toString(color) : null;
+	
        	int endFile = move.charAt(startIndex++) - 97;
 	int endRank = move.charAt(startIndex) - 49;
 
 	String piecePlusColor = Character.toString(piece) + Character.toString(color);
+	String endPiece = promote ? promotion : piecePlusColor;
 
 	int[] startPos = getStartPosition(piece, color, piecePlusColor, endFile, endRank, start, capture);
-	move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+	move(endPiece, startPos[0], startPos[1], endFile, endRank);
     }
 
     /**
@@ -258,12 +264,13 @@ public class PgnReader {
 	}
 
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
-
+	System.out.println(piece);
 	int[] startPos = null;
 	
 	if (piece == 'P') {
 	    startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
 	} else if (piece == 'R') {
+	    System.out.println(piecePos[1].length);
 	    startPos = getRookStart(piecePos, endFile, endRank);
 	} else if (piece == 'N') {
 	    startPos = getKnightStart(piecePos, endFile, endRank);
@@ -401,7 +408,6 @@ public class PgnReader {
 	    
 	    for (int[] pos: piecePos) {
 		if (endRank == pos[1] + direction) {
-		    System.out.println(endRank + ", " + pos[1] + "+" + direction);
 		    int[] posInfo = {pos[0], pos[1]};
 
 		    return posInfo;
