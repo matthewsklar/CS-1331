@@ -103,10 +103,10 @@ public class PgnReader {
 	boardState[endRank][endFile] = piece;
 
 	System.out.println("");
-	
-	for (String[] i: boardState) {
-	    for (String j: i) {
-		System.out.print(j);
+
+	for (int i = 7; i >= 0; i--) {
+	    for (int j = 0; j < 8; j++) {
+		System.out.print(boardState[i][j]);
 	    }
 
 	    System.out.println("");
@@ -213,11 +213,9 @@ public class PgnReader {
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
 	
 	if (piece == 'P') {
-	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
+    	    int direction = color == 'w' ? 1 : -1;
+	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, direction, capture);
 	    move(piecePlusColor, startPos[0], startPos[1], startPos[2], startPos[3]);
-	    if (endRank != startPos[3]) {
-		move("  ", endFile, endRank, endFile, endRank);
-	    }
 
 	    return startPos;
 	} else if (piece == 'R') {
@@ -350,26 +348,31 @@ public class PgnReader {
      * @param color The color of the pawns.
      * @param endFile The file of the pawn after moving.
      * @param endRank The rank of the pawn after moving.
+     * @param direction The direction the pawn moves ('w' = 1; 'b' = -1).
      * @param capture If the pawn is capturing a piece.
      *
      * @return An integer array storing the position of the pawn that will be moved and its
      * end position.
      */
-    public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
+    public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, int direction, boolean capture) {
 	if (capture) {
-	    int direction = color == 'w' ? 1 : -1;
+	    // En Passant
+	    if (getBoardStateSquare(endFile, endRank) == "  ") {
+		for (int[] pos: piecePos) {
+		    if (endRank == pos[1] + direction) {
+			int[] posInfo = {pos[0], pos[1], endFile, endRank};
+			move("  ", endFile, endRank, endFile, pos[1]);
+
+			return posInfo;
+		    }
+		}
+
+	    }
 	    
 	    for (int[] pos: piecePos) {
 		if (endRank == pos[1] + direction) {
+		    System.out.println(endRank + ", " + pos[1] + "+" + direction);
 		    int[] posInfo = {pos[0], pos[1], endFile, endRank};
-
-		    return posInfo;
-		}
-	    }
-
-	    for (int[] pos: piecePos) {
-		if (endRank == pos[1]) {
-		    int[] posInfo = {pos[0], pos[1], endFile, pos[1] + direction};
 
 		    return posInfo;
 		}
