@@ -173,7 +173,9 @@ public class PgnReader {
 
 	    return;
 	} else if (move.equals("O-O-O")) {
+	    castleQueenSide(color);
 
+	    return;
 	}
 	
 	char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0) : 'P';
@@ -218,6 +220,26 @@ public class PgnReader {
 
 	move(king, 4, rank, 6, rank);
 	move(rook, 7, rank, 5, rank);
+    }
+
+    /**
+     * Handle queen side castling. Queen side castling is annotated as "O-O-O" and
+     * moves the king to c1 for white and c8 for black and the rook to d1 for
+     * white and d8 for black. This method moves the king and rook to the correct
+     * square.
+     *
+     * @param color The color that is castling.
+     */    
+    public static void castleQueenSide(char color) {
+	String colorString = Character.toString(color);
+	
+	String king = "K" + colorString;
+	String rook = "R" + colorString;
+
+	int rank = color == 'w' ? 0 : 7;
+
+	move(king, 4, rank, 2, rank);
+	move(rook, 0, rank, 3, rank);
     }
     
     /**
