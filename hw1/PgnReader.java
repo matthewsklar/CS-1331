@@ -449,6 +449,7 @@ public class PgnReader {
      */
     public static int[] getRookStart(int[][] piecePos, int endFile, int endRank) {
 	// TODO: If no specifed start rank or file
+	System.out.println("hoetunsoehu");
 	for (int[] pos: piecePos) {
 	    boolean correct = true;
 	    
