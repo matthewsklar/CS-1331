@@ -135,10 +135,6 @@ public class PgnReader {
      */
     public static void moves(String pgn) {
 	String pgnMoves = pgn.substring(pgn.indexOf("1."));
-	System.out.println(pgnMoves);
-	
-	int currentMove = 1;
-	int moveIndex = pgnMoves.indexOf(currentMove + ". ");
 
 	int lastMoveIndex = 0;
 	int startIndex = 0;
