@@ -134,20 +134,21 @@ public class PgnReader {
      * @param pgn The pgn file.
      */
     public static void moves(String pgn) {
-	//String pgnMoves = pgn.substring(pgn.indexOf("1."));
 	String pgnMoves = pgn.substring(pgn.indexOf("1."));
 	System.out.println(pgnMoves);
+	
 	int currentMove = 1;
 	int moveIndex = pgnMoves.indexOf(currentMove + ". ");
 
-	while (moveIndex != -1) {
-	    currentMove++;
-	    int nextIndex = pgnMoves.indexOf(currentMove + ". ");
+	int lastMoveIndex = 0;
+	int startIndex = 0;
 
-	    int moveDigits = (int) Math.log10(currentMove - 1) + 1;
+	while (startIndex != -1) {
+	    startIndex = pgnMoves.indexOf(".", startIndex);
+	    int endIndex = pgnMoves.indexOf(".", startIndex + 1);
 
-	    if (nextIndex == -1) {
-	        String[] moves = pgnMoves.substring(moveIndex + 2 + moveDigits).split(" ");
+	    if (endIndex == -1) {
+		String[] moves = pgnMoves.substring(startIndex + 1).trim().split(" ");
 
 		processMove(moves[0], 'w');
 
@@ -155,13 +156,13 @@ public class PgnReader {
 		    processMove(moves[1], 'b');
 		}
 	    } else {
-		String[] moves = pgnMoves.substring(moveIndex + 2 + moveDigits, nextIndex).split(" ");
+		String[] moves = pgnMoves.substring(startIndex + 1, endIndex - 1).trim().split(" ");
 
-	        processMove(moves[0], 'w');
+		processMove(moves[0], 'w');
 		processMove(moves[1], 'b');
 	    }
 
-	    moveIndex = nextIndex;
+	    startIndex = endIndex;
 	}
     }
 
