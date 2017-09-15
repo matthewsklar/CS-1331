@@ -98,7 +98,7 @@ public class PgnReader {
      * @param endFile The piece's file (x-axis) after moving.
      * @param endRank The piece's rank (y-axis) after moving.
      */
-    public static void move(String piece, int startFile, int startRank, int endFile, int endRank) {
+    public static void move(String piece, int startFile, int startRank, int endFile, int endRank) {u
 	boardState[startRank][startFile] = "  ";
 	boardState[endRank][endFile] = piece;
 
@@ -134,8 +134,9 @@ public class PgnReader {
      * @param pgn The pgn file.
      */
     public static void moves(String pgn) {
+	//String pgnMoves = pgn.substring(pgn.indexOf("1."));
 	String pgnMoves = pgn.substring(pgn.indexOf("1."));
-
+	System.out.println(pgnMoves);
 	int currentMove = 1;
 	int moveIndex = pgnMoves.indexOf(currentMove + ". ");
 
