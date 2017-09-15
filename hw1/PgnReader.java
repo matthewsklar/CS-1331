@@ -156,7 +156,7 @@ public class PgnReader {
 	    if (moves.length >= 2) {
 		processMove(moves[1], 'b');
 	    }
-
+	    
 	    startIndex = endIndex;
 	}
     }
@@ -168,6 +168,14 @@ public class PgnReader {
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
+	if (move.equals("O-O")) {
+	    castleKingSide(color);
+
+	    return;
+	} else if (move.equals("O-O-O")) {
+
+	}
+	
 	char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0) : 'P';
 
 	int xIndex = move.indexOf('x');
@@ -192,6 +200,26 @@ public class PgnReader {
 	// System.out.println("" + piece + start nnn+ (capture ? "x" : "")  + endFile + endRank);
     }
 
+    /**
+     * Handle king side castling. King side castling is annotated as "O-O" and
+     * moves the king to g1 for white and g8 for black and the rook to f1 for
+     * white and f8 for black. This method moves the king and rook to the correct
+     * square.
+     *
+     * @param color The color that is castling.
+     */
+    public static void castleKingSide(char color) {
+	String colorString = Character.toString(color);
+	
+	String king = "K" + colorString;
+	String rook = "R" + colorString;
+
+	int rank = color == 'w' ? 0 : 7;
+
+	move(king, 4, rank, 6, rank);
+	move(rook, 7, rank, 5, rank);
+    }
+    
     /**
      *
      */
