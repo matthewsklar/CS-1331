@@ -196,10 +196,11 @@ public class PgnReader {
 
        	int endFile = move.charAt(startIndex++) - 97;
 	int endRank = move.charAt(startIndex) - 49;
-	
-	int[] startPos = getStartPosition(piece, color, endFile, endRank, start, capture);
-	
-	// System.out.println("" + piece + start nnn+ (capture ? "x" : "")  + endFile + endRank);
+
+	String piecePlusColor = Character.toString(piece) + Character.toString(color);
+
+	int[] startPos = getStartPosition(piece, color, piecePlusColor, endFile, endRank, start, capture);
+	move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
     }
 
     /**
@@ -245,11 +246,10 @@ public class PgnReader {
     /**
      *
      */
-    public static int[] getStartPosition(char piece, char color, int endFile, int endRank, char start, boolean capture) {
+    public static int[] getStartPosition(char piece, char color, String piecePlusColor, int endFile, int endRank,
+					 char start, boolean capture) {
 	int startFile = -1;
 	int startRank = -1;
-
-	String piecePlusColor = Character.toString(piece) + Character.toString(color);
 
 	if (Character.isLetter(start)) {
 	    startFile = start - 97;
@@ -258,40 +258,24 @@ public class PgnReader {
 	}
 
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
+
+	int[] startPos = null;
 	
 	if (piece == 'P') {
-	    int[] startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
 	} else if (piece == 'R') {
-	    int[] startPos = getRookStart(piecePos, endFile, endRank);
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = getRookStart(piecePos, endFile, endRank);
 	} else if (piece == 'N') {
-	    int[] startPos = getKnightStart(piecePos, endFile, endRank);
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = getKnightStart(piecePos, endFile, endRank);
 	} else if (piece == 'B') {
-	    int[] startPos = getBishopStart(piecePos, endFile, endRank);
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = getBishopStart(piecePos, endFile, endRank);
 	} else if (piece == 'Q') {
-	    int[] startPos = piecePos[0];
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = piecePos[0];
 	} else if (piece == 'K') {
-	    int[] startPos = piecePos[0];
-	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-
-	    return startPos;
+	    startPos = piecePos[0];
 	}
 
-	return null;
+	return startPos;
     }
 
     // TODO: Add support for specified start of position
