@@ -168,6 +168,8 @@ public class PgnReader {
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
+	System.out.println("\nMove: " + move);
+	
 	if (move.equals("O-O")) {
 	    castleKingSide(color);
 
@@ -206,6 +208,7 @@ public class PgnReader {
 	String endPiece = promote ? promotion : piecePlusColor;
 
 	int[] startPos = getStartPosition(piece, color, piecePlusColor, endFile, endRank, start, capture);
+
 	move(endPiece, startPos[0], startPos[1], endFile, endRank);
     }
 
@@ -264,13 +267,11 @@ public class PgnReader {
 	}
 
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
-	System.out.println(piece);
 	int[] startPos = null;
 	
 	if (piece == 'P') {
 	    startPos = getPawnStart(piecePos, color, endFile, endRank, capture);
 	} else if (piece == 'R') {
-	    System.out.println(piecePos[1].length);
 	    startPos = getRookStart(piecePos, endFile, endRank);
 	} else if (piece == 'N') {
 	    startPos = getKnightStart(piecePos, endFile, endRank);
@@ -375,9 +376,9 @@ public class PgnReader {
     }
 
     /**
-     * Handle the movement of pawns. If it is a capture determine direction of the capture
-     * and check if the pawn is in the correct position to capture. If no pawn is in 
-     * position, check for an en passant. If it isnt a capture, check for a pawn on the 
+     * Handle the movement of pawns. If it is a capture determine direction of the capture.
+     * If the end position does not contain a piece, then en passant. Otherwise check if the 
+     * pawn is in the correct position to capture. If it isnt a capture, check for a pawn on the 
      * same file. If the pawn is 2 spaces away, check if is a pawn in the middle
      * space, if there is one then that pawn is moved, the pawn 2 spaces away is moved.
      *
@@ -417,17 +418,31 @@ public class PgnReader {
 	
 	for (int[] pos: piecePos) {
 	    if (pos[0] == endFile) {
-       		if (Math.abs(endRank - pos[1]) == 2) {
-		    if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
-			int[] posInfo = {endFile, (endRank + pos[1]) / 2, endFile, endRank};
+       		//if (Math.abs(endRank - pos[1]) == 2) {
+		if (Math.abs(endRank - pos[1]) == 1) {
+		    int[] posInfo = {pos[0], pos[1]};
 
-			return posInfo;
+		    return posInfo;
+		}
+		
+		int direction = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
+		    //if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
+		boolean correct = true;
+		System.out.println("oehutn");
+		for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
+		    System.out.println(getBoardStateSquare(endFile, Math.abs(r + direction * pos[1] + 1)));
+		    if (getBoardStateSquare(endFile, Math.abs(r + direction * pos[1] + 1)) != "  ") {
+			correct = false;
+			
+			break;
 		    }
 		}
 
-		int[] posInfo = {pos[0], pos[1]};
+		if (correct) {
+		    int[] posInfo = {pos[0], pos[1]};
 
-		return posInfo;
+		    return posInfo;
+		}
 	    }
 	}
 
@@ -449,7 +464,6 @@ public class PgnReader {
      */
     public static int[] getRookStart(int[][] piecePos, int endFile, int endRank) {
 	// TODO: If no specifed start rank or file
-	System.out.println("hoetunsoehu");
 	for (int[] pos: piecePos) {
 	    boolean correct = true;
 	    
@@ -474,7 +488,7 @@ public class PgnReader {
 	    if (pos[1] == endRank) {
 		correct = true;
 
-		int direction = (endFile - pos[0]) / Math.abs(endFile - pos[1]);
+		int direction = (endFile - pos[0]) / Math.abs(endFile - pos[0]);
 
 		for (int f = 0; f < Math.abs(pos[0] - endFile) - 1; f++) {
 		    if (getBoardStateSquare(Math.abs(f + direction * pos[0] + 1), endRank) != "  ") {
