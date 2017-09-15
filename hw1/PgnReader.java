@@ -226,7 +226,7 @@ public class PgnReader {
 
 	    return startPos;
 	} else if (piece == 'N') {
-	    int[] startPos = getRookStart(piecePos, endFile, endRank);
+	    int[] startPos = getKnightStart(piecePos, endFile, endRank);
 	    move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
 
 	    return startPos;
@@ -403,8 +403,8 @@ public class PgnReader {
      * if there are any pieces on the same rank on a file between the start and end file.
      *
      * @param piecePos The positions of all rooks of the correct color.
-     * @param endFile The file of the rooks after moving.
-     * @param endRank The rank of the rooks after moving.
+     * @param endFile The file of the rook after moving.
+     * @param endRank The rank of the rook after moving.
      *
      * @return An integer array storing the position of the rook that will be moved.
      */
@@ -456,9 +456,31 @@ public class PgnReader {
     }
 
     /**
-     * 
+     * Handle the movement of knigths. If the knight's file is one away from the final
+     * file, then the knight's rank is either two away from the final rank or the knight
+     * is not able to move there. If the knight's rank is one away from the final rank,
+     * then the knight's file is either two away from the final file or the knight is
+     * not able to move there.
+     *
+     * @param piecePos The positions of all knights of the correct color.
+     * @param endFile The file of the knight after moving.
+     * @param endRank The rank of the knight after moving.
+     *
+     * @return An integer array storing the position of the knight that will be moved.
      */
     public static int[] getKnightStart(int[][] piecePos, int endFile, int endRank) {
+	for (int[] pos: piecePos) {
+	    if ((pos[0] + 1 == endFile || pos[0] - 1 == endFile) && (pos[1] + 2 == endRank || pos[1] - 2 == endRank)) {
+		int[] startPos = {pos[0], pos[1]};
+
+		return startPos;
+	    } else if ((pos[0] + 2 == endFile || pos[0] - 2 == endFile) && (pos[1] + 1 == endRank || pos[1] - 1 == endRank)) {
+		int[] startPos = {pos[0], pos[1]};
+
+		return startPos;
+	    }
+	}
+
 	return null;
     }
     
