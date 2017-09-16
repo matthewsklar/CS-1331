@@ -104,9 +104,18 @@ public class PgnReader {
 
 	System.out.println("");
 
-	for (int i = 7; i >= 0; i--) {
+	for (int i = 7; i >= -1; i--) {
+	    if (i != -1) System.out.print(i + "|");
+	    else System.out.print(" |");
+	    
 	    for (int j = 0; j < 8; j++) {
-		System.out.print(boardState[i][j]);
+		if (i == -1) {
+		    System.out.print(" " + j + "|");
+
+		    continue;
+		}
+		
+		System.out.print(boardState[i][j] + "|");
 	    }
 
 	    System.out.println("");
@@ -160,10 +169,15 @@ public class PgnReader {
 	    startIndex = endIndex;
 	}
     }
+    // TODO: Cleanup code
 
     /**
-     * Obtain information from algebraic notation of move.
-     *n
+     * Obtain information from algebraic notation of move. First, remove all annotations
+     * from the end of the notation. After, if the move is a castle, call the relevant method.
+     * If the move is not a castle, retrieve relevent information from the notation, removing
+     * the information from the notation after storing it. Use the information to get the starting
+     * position of the piece moved and move the piece.
+     *
      * @param move The algebraic notation of the move.
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
@@ -318,7 +332,7 @@ public class PgnReader {
 	} else if (piece == 'B') {
 	    startPos = getBishopStart(piecePos, endFile, endRank);
 	} else if (piece == 'Q') {
-	    startPos = piecePos[0];
+	    startPos = getQueenStart(piecePos, endFile, endRank);
 	} else if (piece == 'K') {
 	    startPos = piecePos[0];
 	}
@@ -504,7 +518,6 @@ public class PgnReader {
      * @return An integer array storing the position of the rook that will be moved.
      */
     public static int[] getRookStart(int[][] piecePos, int endFile, int endRank) {
-	// TODO: If no specifed start rank or file
 	for (int[] pos: piecePos) {
 	    boolean correct = true;
 	    
@@ -595,10 +608,54 @@ public class PgnReader {
 
 	for (int[] pos: piecePos) {
 	    if ((pos[0] + pos[1]) % 2 == bishopColor) {
-		int[] startPos = {pos[0], pos[1]};
+		int fDir = (endFile - pos[0]) / Math.abs(endFile - pos[0]);
+		int rDir = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
 
-		return startPos;
+		boolean correct = true;
+		System.out.println("F-dir: " + fDir + ", R-dir: " + rDir);
+		for (int i = 0; i < Math.abs(pos[0] - endFile) - 1; i++) {
+		    int file = Math.abs(i + fDir * pos[0] + 1);
+		    int rank = Math.abs(i + rDir * pos[1]  +1);
+		    System.out.println(file + ", " + rank);
+
+		    if (getBoardStateSquare(file, rank) != "  ") {
+			correct = false;
+		    }
+		}
+
+		if (correct) {
+		    int[] startPos = {pos[0], pos[1]};
+
+		    return startPos;
+		}
 	    }
+	}
+
+	return null;
+    }
+
+    /**
+     * Handle the movement of Queens. First, check if any queen is capable of making a rook move.
+     * If one is, return its starting position; otherwise, check if any queen is capble of making
+     * a bishop move. If one is, return its starting position; otherwise, return null.
+     *
+     * @param piecePos The positions of all queens of the correct color.
+     * @param endFile The file of the queen after moving.
+     * @param endRank The rank of the queen after moving.
+     *
+     * @return An integer array storing the starting position of the queen that will be moved.
+     */
+    public static int[] getQueenStart(int[][] piecePos, int endFile, int endRank) {
+	int[] rookMove = getRookStart(piecePos, endFile, endRank);
+
+	if (rookMove != null) {
+	    return rookMove;
+	}
+
+	int[] bishopMove = getBishopStart(piecePos, endFile, endRank);
+
+	if (bishopMove != null) {
+	    return bishopMove;
 	}
 
 	return null;
