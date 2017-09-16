@@ -62,6 +62,8 @@ public class PgnReader {
 	boardState = createBoardState();
 
 	moves(pgn);
+
+	System.out.println(pgnToFen());
 	
 	return "TODO: Complete this";
     }
@@ -612,11 +614,10 @@ public class PgnReader {
 		int rDir = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
 
 		boolean correct = true;
-		System.out.println("F-dir: " + fDir + ", R-dir: " + rDir);
+
 		for (int i = 0; i < Math.abs(pos[0] - endFile) - 1; i++) {
 		    int file = Math.abs(i + fDir * pos[0] + 1);
 		    int rank = Math.abs(i + rDir * pos[1]  +1);
-		    System.out.println(file + ", " + rank);
 
 		    if (getBoardStateSquare(file, rank) != "  ") {
 			correct = false;
@@ -659,5 +660,49 @@ public class PgnReader {
 	}
 
 	return null;
+    }
+
+    /**
+     * Covnert the game in pgn to fen. Get the current board state and
+     * iterate through every rank to find the fen of each row. Combine
+     * them together to form the complete fen.
+     *
+     * @return The fen of the board state corresponding to the pgn.
+     */
+    public static String pgnToFen() {
+	String fen = "";
+	
+	for (int i = boardState.length - 1; i >= 0; i--) {
+	    String fenLine = "";
+
+	    int spaceStreak = 0;
+	    
+	    for (String file: boardState[i]) {
+		String piece = Character.toString(file.charAt(0));
+		char color = file.charAt(1);
+
+		if (color == ' ') {
+		    spaceStreak++;
+
+		    continue;
+		} else if (spaceStreak > 0) {
+		    fenLine += spaceStreak;
+
+		    spaceStreak = 0;
+		}
+
+		String square = color == 'w' ? piece : piece.toLowerCase();
+
+		fenLine += square;
+	    }
+
+	    if (spaceStreak > 0) {
+		fenLine += spaceStreak;
+	    }
+	    
+	    fen += fenLine + (i != 0 ? "/" : "");
+	}
+
+	return fen;
     }
 }
