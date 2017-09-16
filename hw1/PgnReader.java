@@ -60,7 +60,7 @@ public class PgnReader {
      */
     public static String finalPosition(String pgn) {
 	boardState = createBoardState();
-	
+
 	moves(pgn);
 	
 	return "TODO: Complete this";
@@ -163,51 +163,101 @@ public class PgnReader {
 
     /**
      * Obtain information from algebraic notation of move.
-     *
+     *n
      * @param move The algebraic notation of the move.
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
-	System.out.println("\nMove: " + move);
+	System.out.println("\nMove: \t\t\t|" + move + "|");
+
+	char lastChar = move.charAt(move.length() - 1);
+	if (lastChar == '+' || lastChar == '#') {
+	    move = move.substring(0, move.length() - 1);
+	}
+
+	System.out.println("\tRemove +!:\t|" + move + "|");
 	
+	// Castling
 	if (move.equals("O-O")) {
 	    castleKingSide(color);
+	    
+	    System.out.println("\tKing Side Castle");
 
 	    return;
 	} else if (move.equals("O-O-O")) {
 	    castleQueenSide(color);
+	    
+	    System.out.println("\tQueen Side Castle");
 
 	    return;
 	}
-	
-	char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0) : 'P';
 
-	int xIndex = move.indexOf('x');
-	boolean capture = xIndex != -1;
+	char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0) : 'P';
 
 	int promoteIndex = move.indexOf('=');
 	boolean promote = promoteIndex != -1;
 	
-	int startIndex = piece == 'P' ? 0 : 1;
-	char start = '\0';
+	int xIndex = move.indexOf('x');
+	boolean capture = xIndex != -1;
 
-	if (capture) {
-	    if (move.charAt(startIndex) != 'x') {
-		start = move.charAt(startIndex);
-	    }
-
-	    startIndex = xIndex + 1;
+	if (piece != 'P') {
+	    move = move.substring(1, move.length());
 	}
 
-	String promotion = promote ? Character.toString(move.charAt(promoteIndex + 1)) + Character.toString(color) : null;
+	System.out.println("\tRemove Piece:\t|" + move + "|");
 	
-       	int endFile = move.charAt(startIndex++) - 97;
-	int endRank = move.charAt(startIndex) - 49;
+	String promotion = promote ? Character.toString(move.charAt(promoteIndex + 1)) + Character.toString(color) : null;
+
+	if (promote) {
+	    move = move.substring(0, promoteIndex);
+	}
+
+	System.out.println("\tRemove Promote:\t|" + move + "|");
+	
+	if (capture) {
+	    move = move.replace("x", "");
+	}
+	
+	System.out.println("\tRemove x:\t|" + move + "|");
+	
+	int endFile = move.charAt(move.length() - 2) - 97;
+	int endRank = move.charAt(move.length() - 1) - 49;
+
+	move = move.substring(0, move.length() - 2);
+
+	System.out.println("\tRemove End:\t|" + move + "|");
+
+	int startFile = -1;
+	int startRank = -1;
+
+	if (move != "") {
+	    for (int i = 0; i < move.length(); i++) {
+		char c = move.charAt(i);
+
+		if (Character.isLetter(c)) {
+		    startFile = c - 97;
+		} else {
+		    startRank = c - 49;
+		}
+	    }
+
+	    move = "";
+	}
 
 	String piecePlusColor = Character.toString(piece) + Character.toString(color);
 	String endPiece = promote ? promotion : piecePlusColor;
+	
+	System.out.println("\tRemove Start:\t|" + move + "|");
+	
+	System.out.println("\t\t\t\tPiece:\t\t" + piece);
+	System.out.println("\t\t\t\tPromotion:\t" + promotion);
+	System.out.println("\t\t\t\tCapture:\t" + capture);
+	System.out.println("\t\t\t\tEnd File:\t" + endFile);
+	System.out.println("\t\t\t\tEnd Rank:\t" + endRank);
+	System.out.println("\t\t\t\tStart File:\t" + startFile);
+	System.out.println("\t\t\t\tStart Rank:\t" + startRank);
 
-	int[] startPos = getStartPosition(piece, color, piecePlusColor, endFile, endRank, start, capture);
+	int[] startPos = getStartPosition(piece, color, piecePlusColor, startFile, startRank, endFile, endRank, capture);
 
 	move(endPiece, startPos[0], startPos[1], endFile, endRank);
     }
@@ -255,17 +305,7 @@ public class PgnReader {
     /**
      *
      */
-    public static int[] getStartPosition(char piece, char color, String piecePlusColor, int endFile, int endRank,
-					 char start, boolean capture) {
-	int startFile = -1;
-	int startRank = -1;
-
-	if (Character.isLetter(start)) {
-	    startFile = start - 97;
-	} else if (Character.isDigit(start)) {
-	    startRank = start - 49;
-	}
-
+    public static int[] getStartPosition(char piece, char color, String piecePlusColor, int startFile, int startRank, int endFile, int endRank, boolean capture) {
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
 	int[] startPos = null;
 	
@@ -286,26 +326,29 @@ public class PgnReader {
 	return startPos;
     }
 
-    // TODO: Add support for specified start of position
-    
     /**
-     * Get the positions of instances of piece. If start exists
-     * then only get instances of the piece that fit the start position.
+     * Get the positions of instances of piece. If information about a starting
+     * position exists, then only get instances of the piece that fit the information
+     * about the start position.
      *
      * @param piece The piece to get the positions of in the format Pc.
      * @param startFile The start file if it is already known.
      * @param startRank The start rank if it is already known.
      *
      * @return A double integer array containing each the rank and file 
-     * for every position of the piece.
+     * for every position of the piece that fits the starting parameters.
      */
     public static int[][] getPiecePositions(String piece, int startFile, int startRank) {
-	// TODO: Take into account starting position if it matters
 	int numPiecePos = 0;
 
 	int[][] piecePos;
-	
-	if (startFile != -1) {
+
+	if (startFile != -1 && startRank != -1) {
+	    piecePos = new int[1][2];
+
+	    piecePos[0][0] = startFile;
+	    piecePos[0][1] = startRank;
+	} else if (startFile != -1) {
 	    for (int r = 0; r < 8; r++) {
 		if (getBoardStateSquare(startFile, r).equals(piece)) {
 		    numPiecePos++;
@@ -324,50 +367,48 @@ public class PgnReader {
 		    pieceIndex++;
 		}
 	    }
-
-	    return piecePos;
 	} else if (startRank != -1) {
 	    for (int f = 0; f < 8; f++) {
-		if (getBoardStateSquare(startFile, f).equals(piece)) {
+		System.out.println(f + ", " + startRank);
+		System.out.println(getBoardStateSquare(f, startRank));
+		if (getBoardStateSquare(f, startRank).equals(piece)) {
 		    numPiecePos++;
 		}
+	    }
 
-		piecePos = new int[numPiecePos][2];
+	    piecePos = new int[numPiecePos][2];
 
-		int pieceIndex = 0;
+	    int pieceIndex = 0;
 	    
-		for (int file = 0; file < 8; file++) {
-		    if (getBoardStateSquare(file, startRank).equals(piece)) {
-			piecePos[pieceIndex][0] = file;
-			piecePos[pieceIndex][1] = startRank;
+	    for (int file = 0; file < 8; file++) {
+		if (getBoardStateSquare(file, startRank).equals(piece)) {
+		    piecePos[pieceIndex][0] = file;
+		    piecePos[pieceIndex][1] = startRank;
+
+		    pieceIndex++;
+		}
+	    }
+	} else {
+	    for (String[] rank: boardState) {
+		for (String square: rank) {
+		    if (square.equals(piece)) {
+			numPiecePos++;
+		    }
+		}
+	    }
+
+	    piecePos = new int[numPiecePos][2];
+
+	    int pieceIndex = 0;
+
+	    for (int r = 0; r < boardState.length; r++) {
+		for (int f = 0; f < boardState[r].length; f++) {
+		    if (getBoardStateSquare(f, r).equals(piece)) {
+			piecePos[pieceIndex][0] = f;
+			piecePos[pieceIndex][1] = r;
 
 			pieceIndex++;
 		    }
-		}
-
-		return piecePos;
-	    }
-	}
-	
-	for (String[] rank: boardState) {
-	    for (String square: rank) {
-		if (square.equals(piece)) {
-		    numPiecePos++;
-		}
-	    }
-	}
-
-	piecePos = new int[numPiecePos][2];
-
-	int pieceIndex = 0;
-
-	for (int r = 0; r < boardState.length; r++) {
-	    for (int f = 0; f < boardState[r].length; f++) {
-		if (getBoardStateSquare(f, r).equals(piece)) {
-		    piecePos[pieceIndex][0] = f;
-		    piecePos[pieceIndex][1] = r;
-
-		    pieceIndex++;
 		}
 	    }
 	}
