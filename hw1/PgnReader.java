@@ -1,3 +1,4 @@
+// TODO: Cleanup code
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -30,9 +31,8 @@ public class PgnReader {
      * @param name The name of the tag.
      * @param pgn The pgn file.
      *
-     * @return A String containing the value of the tag with the given name
-     * in the pgn file. If the tag is not found, it returns the String
-     * "NOT GIVEN".
+     * @return The value of the tag with the given name in the pgn file. 
+     * If the tag is not found, it returns the String "NOT GIVEN".
      */
     public static String tagValue(String name, String pgn) {
         name = "[" + name;
@@ -55,17 +55,14 @@ public class PgnReader {
      *
      * @param pgn The pgn file.
      *
-     * @return A String containing the FEN of the final position in the pgn
-     * file.
+     * @return The FEN of the final position in the pgn file.
      */
     public static String finalPosition(String pgn) {
 	boardState = createBoardState();
 
 	moves(pgn);
 
-	System.out.println(pgnToFen());
-	
-	return "TODO: Complete this";
+	return pgnToFen();
     }
 
     /**
@@ -73,8 +70,8 @@ public class PgnReader {
      *
      * R = Rook; B = Bishop; N = Knight; K = King; Q = Queen; P = Pawn
      *
-     * @return A double Strain garray containing the initial 
-     * state of the chess board with each piece in the form Pc.
+     * @return The initial state of the chess board with each piece in 
+     * the form Pc.
      */
     public static String[][] createBoardState() {
 	String[][] boardState = {
@@ -130,9 +127,9 @@ public class PgnReader {
      * @param file The file (x-axis) of the board.
      * @param rank The rank (y-axis) of the board.
      *
-     * @return A string representing the value of the piece on the square.
-     * "  " = no piece
-     * "Pc" = Piece color
+     * @return The value of the piece on the square.
+     *     "  " = no piece
+     *     "Pc" = Piece color
      */
     public static String getBoardStateSquare(int file, int rank) {
 	return boardState[rank][file];
@@ -171,7 +168,6 @@ public class PgnReader {
 	    startIndex = endIndex;
 	}
     }
-    // TODO: Cleanup code
 
     /**
      * Obtain information from algebraic notation of move. First, remove all annotations
@@ -351,8 +347,7 @@ public class PgnReader {
      * @param startFile The start file if it is already known.
      * @param startRank The start rank if it is already known.
      *
-     * @return A double integer array containing each the rank and file 
-     * for every position of the piece that fits the starting parameters.
+     * @return The rank and file for every position of the piece that fits the starting parameters.
      */
     public static int[][] getPiecePositions(String piece, int startFile, int startRank) {
 	int numPiecePos = 0;
@@ -445,7 +440,7 @@ public class PgnReader {
      * @param endRank The rank of the pawn after moving.
      * @param capture If the pawn is capturing a piece.
      *
-     * @return An integer array storing the position of the pawn that will be moved.
+     * @return The position of the pawn that will be moved.
      */
     public static int[] getPawnStart(int[][] piecePos, char color, int endFile, int endRank, boolean capture) {
 	if (capture) {
@@ -517,7 +512,7 @@ public class PgnReader {
      * @param endFile The file of the rook after moving.
      * @param endRank The rank of the rook after moving.
      *
-     * @return An integer array storing the position of the rook that will be moved.
+     * @return The position of the rook that will be moved.
      */
     public static int[] getRookStart(int[][] piecePos, int endFile, int endRank) {
 	for (int[] pos: piecePos) {
@@ -576,7 +571,7 @@ public class PgnReader {
      * @param endFile The file of the knight after moving.
      * @param endRank The rank of the knight after moving.
      *
-     * @return An integer array storing the position of the knight that will be moved.
+     * @return The position of the knight that will be moved.
      */
     public static int[] getKnightStart(int[][] piecePos, int endFile, int endRank) {
 	for (int[] pos: piecePos) {
@@ -603,7 +598,7 @@ public class PgnReader {
      * @param endFile The file of the bishop after moving.
      * @param endRank The rank of the bishop after moving.
      *
-     * @return An integer array storing the starting position of the bishop that will be moved.
+     * @return The starting position of the bishop that will be moved.
      */
     public static int[] getBishopStart(int[][] piecePos, int endFile, int endRank) {
 	int bishopColor = (endFile + endRank) % 2;
@@ -644,7 +639,7 @@ public class PgnReader {
      * @param endFile The file of the queen after moving.
      * @param endRank The rank of the queen after moving.
      *
-     * @return An integer array storing the starting position of the queen that will be moved.
+     * @return The starting position of the queen that will be moved.
      */
     public static int[] getQueenStart(int[][] piecePos, int endFile, int endRank) {
 	int[] rookMove = getRookStart(piecePos, endFile, endRank);
@@ -663,7 +658,7 @@ public class PgnReader {
     }
 
     /**
-     * Covnert the game in pgn to fen. Get the current board state and
+     * Convert the game in pgn to fen. Get the current board state and
      * iterate through every rank to find the fen of each row. Combine
      * them together to form the complete fen.
      *
