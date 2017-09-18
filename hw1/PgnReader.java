@@ -1,6 +1,11 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Read a chess PGN file and interpret analyze its content.
+ *
+ * @author msklar3
+ */
 public class PgnReader {
     private static String[][] boardState;
 
@@ -27,8 +32,8 @@ public class PgnReader {
      * @param rank The rank (y-axis) of the square on the board.
      *
      * @return The value of the piece on the square.
-     *     "  " = no piece
-     *     "Pc" = Piece color
+     *         "  " = no piece
+     *         "Pc" = Piece color
      */
     public static String getBoardStateSquare(int file, int rank) {
         return boardState[rank][file];
@@ -76,7 +81,7 @@ public class PgnReader {
      * @param pgn The pgn file.
      *
      * @return The value of the tag with the given name in the pgn file.
-     * If the tag is not found, it returns the String "NOT GIVEN".
+     *         If the tag is not found, it returns the String "NOT GIVEN".
      */
     public static String tagValue(String name, String pgn) {
         name = "[" + name;
@@ -115,7 +120,7 @@ public class PgnReader {
      * R = Rook; B = Bishop; N = Knight; K = King; Q = Queen; P = Pawn
      *
      * @return The initial state of the chess board with each piece in
-     * the form Pc.
+     *         the form Pc.
      */
     public static String[][] createBoardState() {
         String[][] boardState = {
@@ -142,7 +147,7 @@ public class PgnReader {
      * @param endRank The piece's rank (y-axis) after moving.
      */
     public static void move(String piece, int startFile, int startRank,
-                             int endFile, int endRank) {
+                            int endFile, int endRank) {
         setBoardStateSquare(startFile, startRank, "  ");
         setBoardStateSquare(endFile, endRank, piece);
     }
@@ -170,7 +175,7 @@ public class PgnReader {
                 moves = pgnMoves.substring(startIndex + 1).trim().split(" ");
             } else {
                 moves = pgnMoves.substring(startIndex + 1, endIndex - 1).trim()
-                    .split(" ");
+                        .split(" ");
             }
 
             processMove(moves[0], 'w');
@@ -213,7 +218,7 @@ public class PgnReader {
         }
 
         char piece = Character.isUpperCase(move.charAt(0)) ? move.charAt(0)
-            : 'P';
+                                                           : 'P';
 
         int promoteIndex = move.indexOf('=');
         boolean promote = promoteIndex != -1;
@@ -225,9 +230,10 @@ public class PgnReader {
             move = move.substring(1, move.length());
         }
 
-        String promotion = promote ? Character.toString(
-            move.charAt(promoteIndex + 1))
-            + Character.toString(color) : null;
+        String promotion = promote
+                           ? Character.toString(move.charAt(promoteIndex + 1))
+                               + Character.toString(color)
+                           : null;
 
         if (promote) {
             move = move.substring(0, promoteIndex);
@@ -261,11 +267,12 @@ public class PgnReader {
 
         String piecePlusColor =
             Character.toString(piece) + Character.toString(color);
+                
         String endPiece = promote ? promotion : piecePlusColor;
 
-        int[] startPos = getStartPosition(piece, color, piecePlusColor,
-                                          startFile, startRank, endFile,
-                                          endRank, capture);
+        int[] startPos = getStartPosition(piece, color, startFile,
+					  startRank, endFile, endRank,
+					  capture);
 
         move(endPiece, startPos[0], startPos[1], endFile, endRank);
     }
@@ -313,13 +320,11 @@ public class PgnReader {
     /**
      * Get the start position of the moved piece. Get pieces with the correct
      * start positions. Each piece has different movement, so call the method
-     * that corresponds with the piece and returs the start position of the
+     * that corresponds with the piece and returns the start position of the
      * piece.
      *
      * @param piece The piece that was moved.
      * @param color The color of the piece that was moved.
-     * @param piecePlusColor A string combining the piece that was moved and
-     *        its color.
      * @param startFile The file the piece starts on (-1 if unknown).
      * @param startRank The rank the piece starts on (-1 if unknown).
      * @param endFile The file the piece ends on.
@@ -328,10 +333,11 @@ public class PgnReader {
      *
      * @return The start position of the piece.
      */
-    public static int[] getStartPosition(char piece, char color,
-                                           String piecePlusColor, int startFile,
-                                           int startRank, int endFile,
-                                           int endRank, boolean capture) {
+    public static int[] getStartPosition(char piece, char color, int startFile,
+            int startRank, int endFile, int endRank, boolean capture) {
+        String piecePlusColor =
+            Character.toString(piece) + Character.toString(color);
+
         int[][] piecePos = getPiecePositions(piecePlusColor, startFile,
                                              startRank);
         int[] startPos = null;
@@ -415,7 +421,7 @@ public class PgnReader {
                 }
             }
         } else {
-            for (String[] rank: boardState) {
+            for (String[] rank: getBoardState()) {
                 for (String square: rank) {
                     if (square.equals(piece)) {
                         numPiecePos++;
@@ -427,7 +433,7 @@ public class PgnReader {
 
             int pieceIndex = 0;
 
-            for (int r = 0; r < boardState.length; r++) {
+            for (int r = 0; r < getBoardState().length; r++) {
                 for (int f = 0; f < getBoardState()[r].length; f++) {
                     if (getBoardStateSquare(f, r).equals(piece)) {
                         piecePos[pieceIndex][0] = f;
@@ -488,7 +494,6 @@ public class PgnReader {
 
         for (int[] pos: piecePos) {
             if (pos[0] == endFile) {
-                //if (Math.abs(endRank - pos[1]) == 2) {
                 if (Math.abs(endRank - pos[1]) == 1) {
                     int[] posInfo = {pos[0], pos[1]};
 
@@ -501,9 +506,8 @@ public class PgnReader {
 
                 for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
                     if (!getBoardStateSquare(endFile,
-                                             Math.abs(
-                                             r + direction * pos[1] + 1)
-                                             ).equals("  ")) {
+                            Math.abs(r + direction * pos[1] + 1))
+                            .equals("  ")) {
                         correct = false;
 
                         break;
@@ -544,9 +548,9 @@ public class PgnReader {
                 int direction = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
 
                 for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
-                    if (!getBoardStateSquare(endFile, Math.abs(
-                                                    r + direction * pos[1] + 1))
-                                                    .equals("  ")) {
+                    if (!getBoardStateSquare(endFile,
+                            Math.abs(r + direction * pos[1] + 1))
+                            .equals("  ")) {
                         correct = false;
 
                         break;
@@ -567,8 +571,8 @@ public class PgnReader {
 
                 for (int f = 0; f < Math.abs(pos[0] - endFile) - 1; f++) {
                     if (!getBoardStateSquare(Math.abs(
-                                             f + direction * pos[0] + 1
-                                             ), endRank).equals("  ")) {
+                            f + direction * pos[0] + 1), endRank)
+                            .equals("  ")) {
                         correct = false;
 
                         break;
@@ -603,12 +607,13 @@ public class PgnReader {
                                        int endRank) {
         for (int[] pos: piecePos) {
             if ((pos[0] + 1 == endFile || pos[0] - 1 == endFile)
-                && (pos[1] + 2 == endRank || pos[1] - 2 == endRank)) {
+                    && (pos[1] + 2 == endRank || pos[1] - 2 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
 
                 return startPos;
             } else if ((pos[0] + 2 == endFile || pos[0] - 2 == endFile)
-                       && (pos[1] + 1 == endRank || pos[1] - 1 == endRank)) {
+                           && (pos[1] + 1 == endRank
+                               || pos[1] - 1 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
 
                 return startPos;
@@ -699,7 +704,7 @@ public class PgnReader {
     public static String pgnToFen() {
         String fen = "";
 
-        for (int i = boardState.length - 1; i >= 0; i--) {
+        for (int i = getBoardState().length - 1; i >= 0; i--) {
             String fenLine = "";
 
             int spaceStreak = 0;
