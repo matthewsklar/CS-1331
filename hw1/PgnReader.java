@@ -4,8 +4,12 @@ import java.nio.file.Paths;
 
 public class PgnReader {
     public static String[][] boardState;
-    
-    // http://cs1331.gatech.edu/fall2017/hw1/hw1-pgn-reader.html
+
+    /**
+     * The main method of the program. Get the pgn content from the pgn file
+     * and use the String as a variable to pass to methods to get the tagValues
+     * and the final position.
+     */
     public static void main(String[] args) {
         String pgn = "";
 
@@ -100,25 +104,6 @@ public class PgnReader {
     public static void move(String piece, int startFile, int startRank, int endFile, int endRank) {
 	boardState[startRank][startFile] = "  ";
 	boardState[endRank][endFile] = piece;
-
-	System.out.println("");
-
-	for (int i = 7; i >= -1; i--) {
-	    if (i != -1) System.out.print(i + "|");
-	    else System.out.print(" |");
-	    
-	    for (int j = 0; j < 8; j++) {
-		if (i == -1) {
-		    System.out.print(" " + j + "|");
-
-		    continue;
-		}
-		
-		System.out.print(boardState[i][j] + "|");
-	    }
-
-	    System.out.println("");
-	}
     }
     
     /**
@@ -142,6 +127,7 @@ public class PgnReader {
      * @param pgn The pgn file.
      */
     public static void moves(String pgn) {
+	pgn = pgn.substring(pgn.lastIndexOf("]"), pgn.length());
 	String pgnMoves = pgn.substring(pgn.indexOf("1."));
 
 	int lastMoveIndex = 0;
@@ -180,26 +166,19 @@ public class PgnReader {
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
-	System.out.println("\nMove: \t\t\t|" + move + "|");
-
 	char lastChar = move.charAt(move.length() - 1);
+
 	if (lastChar == '+' || lastChar == '#') {
 	    move = move.substring(0, move.length() - 1);
 	}
-
-	System.out.println("\tRemove +!:\t|" + move + "|");
 	
 	// Castling
 	if (move.equals("O-O")) {
 	    castleKingSide(color);
-	    
-	    System.out.println("\tKing Side Castle");
 
 	    return;
 	} else if (move.equals("O-O-O")) {
 	    castleQueenSide(color);
-	    
-	    System.out.println("\tQueen Side Castle");
 
 	    return;
 	}
@@ -216,28 +195,20 @@ public class PgnReader {
 	    move = move.substring(1, move.length());
 	}
 
-	System.out.println("\tRemove Piece:\t|" + move + "|");
-	
 	String promotion = promote ? Character.toString(move.charAt(promoteIndex + 1)) + Character.toString(color) : null;
 
 	if (promote) {
 	    move = move.substring(0, promoteIndex);
 	}
 
-	System.out.println("\tRemove Promote:\t|" + move + "|");
-	
 	if (capture) {
 	    move = move.replace("x", "");
 	}
-	
-	System.out.println("\tRemove x:\t|" + move + "|");
 	
 	int endFile = move.charAt(move.length() - 2) - 97;
 	int endRank = move.charAt(move.length() - 1) - 49;
 
 	move = move.substring(0, move.length() - 2);
-
-	System.out.println("\tRemove End:\t|" + move + "|");
 
 	int startFile = -1;
 	int startRank = -1;
@@ -259,16 +230,6 @@ public class PgnReader {
 	String piecePlusColor = Character.toString(piece) + Character.toString(color);
 	String endPiece = promote ? promotion : piecePlusColor;
 	
-	System.out.println("\tRemove Start:\t|" + move + "|");
-	
-	System.out.println("\t\t\t\tPiece:\t\t" + piece);
-	System.out.println("\t\t\t\tPromotion:\t" + promotion);
-	System.out.println("\t\t\t\tCapture:\t" + capture);
-	System.out.println("\t\t\t\tEnd File:\t" + endFile);
-	System.out.println("\t\t\t\tEnd Rank:\t" + endRank);
-	System.out.println("\t\t\t\tStart File:\t" + startFile);
-	System.out.println("\t\t\t\tStart Rank:\t" + startRank);
-
 	int[] startPos = getStartPosition(piece, color, piecePlusColor, startFile, startRank, endFile, endRank, capture);
 
 	move(endPiece, startPos[0], startPos[1], endFile, endRank);
@@ -315,7 +276,20 @@ public class PgnReader {
     }
     
     /**
+     * Get the start position of the moved piece. Get pieces with the correct start positions.
+     * Each piece has different movement, so call the method that corresponds with the piece
+     * and returs the start position of the piece.
      *
+     * @param piece The piece that was moved.
+     * @param color The color of the piece that was moved.
+     * @param piecePlusColor A string combining the piece that was moved and its color.
+     * @param startFile The file the piece starts on (-1 if unknown).
+     * @param startRank The rank the piece starts on (-1 if unknown).
+     * @param endFile The file the piece ends on.
+     * @param endRank The rank the piece ends on.
+     * @param capture If the piece is a pawn that captured a piece this turn.
+     *
+     * @return The start position of the piece.
      */
     public static int[] getStartPosition(char piece, char color, String piecePlusColor, int startFile, int startRank, int endFile, int endRank, boolean capture) {
 	int[][] piecePos = getPiecePositions(piecePlusColor, startFile, startRank);
@@ -380,8 +354,6 @@ public class PgnReader {
 	    }
 	} else if (startRank != -1) {
 	    for (int f = 0; f < 8; f++) {
-		System.out.println(f + ", " + startRank);
-		System.out.println(getBoardStateSquare(f, startRank));
 		if (getBoardStateSquare(f, startRank).equals(piece)) {
 		    numPiecePos++;
 		}
@@ -431,7 +403,7 @@ public class PgnReader {
      * Handle the movement of pawns. If it is a capture determine direction of the capture.
      * If the end position does not contain a piece, then en passant. Otherwise check if the 
      * pawn is in the correct position to capture. If it isnt a capture, check for a pawn on the 
-     * same file. If the pawn is 2 spaces away, check if is a pawn in the middle
+     * same file. If the pawn is 2 spaces away, check if is annn pawn in the middle
      * space, if there is one then that pawn is moved, the pawn 2 spaces away is moved.
      *
      * @param piecePos The positions of all pawns of the correct color.
@@ -480,9 +452,8 @@ public class PgnReader {
 		int direction = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
 		    //if (getBoardStateSquare(endFile, (endRank + pos[1]) / 2) == "P" + Character.toString(color)) {
 		boolean correct = true;
-		System.out.println("oehutn");
+
 		for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
-		    System.out.println(getBoardStateSquare(endFile, Math.abs(r + direction * pos[1] + 1)));
 		    if (getBoardStateSquare(endFile, Math.abs(r + direction * pos[1] + 1)) != "  ") {
 			correct = false;
 			
