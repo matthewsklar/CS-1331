@@ -54,6 +54,8 @@ public class PgnReader {
      * The main method of the program. Get the pgn content from the pgn file
      * and use the String as a variable to pass to methods to get the tagValues
      * and the final position.
+     *
+     * @param args Parameters for the project.
      */
     public static void main(String[] args) {
         String pgn = "";
@@ -115,7 +117,8 @@ public class PgnReader {
     }
 
     /**
-     * Create the inital board state of the chess board.
+     * Create the inital board state of the chess board. The pieces
+     * are shown in the form Pc (Piece color).
      *
      * R = Rook; B = Bishop; N = Knight; K = King; Q = Queen; P = Pawn
      *
@@ -123,7 +126,7 @@ public class PgnReader {
      *         the form Pc.
      */
     public static String[][] createBoardState() {
-        String[][] boardState = {
+        String[][] initialBoardState = {
             {"Rw", "Nw", "Bw", "Qw", "Kw", "Bw", "Nw", "Rw"},
             {"Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw", "Pw"},
             {"  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "},
@@ -134,7 +137,7 @@ public class PgnReader {
             {"Rb", "Nb", "Bb", "Qb", "Kb", "Bb", "Nb", "Rb"}
         };
 
-        return boardState;
+        return initialBoardState;
     }
 
     /**
@@ -160,6 +163,7 @@ public class PgnReader {
      */
     public static void moves(String pgn) {
         pgn = pgn.substring(pgn.lastIndexOf("]"), pgn.length());
+
         String pgnMoves = pgn.substring(pgn.indexOf("1."));
 
         int lastMoveIndex = 0;
@@ -267,12 +271,12 @@ public class PgnReader {
 
         String piecePlusColor =
             Character.toString(piece) + Character.toString(color);
-                
+
         String endPiece = promote ? promotion : piecePlusColor;
 
         int[] startPos = getStartPosition(piece, color, startFile,
-					  startRank, endFile, endRank,
-					  capture);
+                                          startRank, endFile, endRank,
+                                          capture);
 
         move(endPiece, startPos[0], startPos[1], endFile, endRank);
     }
@@ -591,7 +595,7 @@ public class PgnReader {
     }
 
     /**
-     * Handle the movement of knigths. If the knight's file is one away from the
+     * Handle the movement of knights. If the knight's file is one away from the
      * final file, then the knight's rank is either two away from the final rank
      * or the knight is not able to move there. If the knight's rank is one away
      * from the final rank, then the knight's file is either two away from the
