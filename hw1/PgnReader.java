@@ -498,30 +498,32 @@ public class PgnReader {
 
         for (int[] pos: piecePos) {
             if (pos[0] == endFile) {
-                if (Math.abs(endRank - pos[1]) == 1) {
+                int direction = color == 'w' ? 1 : -1;
+
+                if (pos[1] + direction == endRank) {
                     int[] posInfo = {pos[0], pos[1]};
 
                     return posInfo;
                 }
 
-                int direction = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
+                if (pos[1] + 2 * direction == endRank) {
+                    boolean correct = true;
 
-                boolean correct = true;
+                    for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
+                        if (!getBoardStateSquare(endFile,
+                                Math.abs(r + direction * pos[1] + 1))
+                                .equals("  ")) {
+                            correct = false;
 
-                for (int r = 0; r < Math.abs(pos[1] - endRank) - 1; r++) {
-                    if (!getBoardStateSquare(endFile,
-                            Math.abs(r + direction * pos[1] + 1))
-                            .equals("  ")) {
-                        correct = false;
-
-                        break;
+                            break;
+                        }
                     }
-                }
 
-                if (correct) {
-                    int[] posInfo = {pos[0], pos[1]};
+                    if (correct) {
+                        int[] posInfo = {pos[0], pos[1]};
 
-                    return posInfo;
+                        return posInfo;
+                    }
                 }
             }
         }
@@ -564,7 +566,9 @@ public class PgnReader {
                 if (correct) {
                     int[] startPos = {pos[0], pos[1]};
 
-                    return startPos;
+		    if (isLegalMove(startPos, endFile, endRank)) {
+			return startPos;
+		    }
                 }
             }
 
@@ -585,8 +589,10 @@ public class PgnReader {
 
                 if (correct) {
                     int[] startPos = {pos[0], pos[1]};
-
-                    return startPos;
+		    
+		    if (isLegalMove(startPos, endFile, endRank)) {
+			return startPos;
+		    }
                 }
             }
         }
@@ -614,13 +620,17 @@ public class PgnReader {
                     && (pos[1] + 2 == endRank || pos[1] - 2 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
 
-                return startPos;
+		if (isLegalMove(startPos, endFile, endRank)) {
+		    return startPos;
+		}
             } else if ((pos[0] + 2 == endFile || pos[0] - 2 == endFile)
                            && (pos[1] + 1 == endRank
-                               || pos[1] - 1 == endRank)) {
+                           || pos[1] - 1 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
-
-                return startPos;
+		
+		if (isLegalMove(startPos, endFile, endRank)) {
+		    return startPos;
+		}
             }
         }
 
@@ -661,7 +671,9 @@ public class PgnReader {
                 if (correct) {
                     int[] startPos = {pos[0], pos[1]};
 
-                    return startPos;
+		    if (isLegalMove(startPos, endFile, endRank)) {
+			return startPos;
+		    }
                 }
             }
         }
@@ -696,6 +708,44 @@ public class PgnReader {
         }
 
         return null;
+    }
+
+    /**
+     * 
+     */
+    public static boolean isLegalMove(int[] startPos, int endFile, int endRank) {
+	String[][] tempBoardState = new String[8][8];
+
+	for (int r = 0; r < 8; r++) {
+	    for (int f = 0; f < 8; f++) {
+		tempBoardState[r][f] = getBoardStateSquare(f, r);
+	    }
+	}
+	
+	String piecePlusColor = getBoardStateSquare(startPos[0], startPos[1]);
+	char piece = piecePlusColor.charAt(0);
+	char color = piecePlusColor.charAt(1);
+	char oppositeColor = color == 'w' ? 'b' : 'w';
+
+	move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+	
+        int[] kingPos = getPiecePositions("K" + color, -1, -1)[0];
+
+	if (kingPos[0] == startPos[0] || kingPos[1] == startPos[1]) {
+	    int[][] rookPos = getPiecePositions("R" + oppositeColor, -1, -1);
+	    
+	    for (int[] rook: rookPos) {
+	        if (getRookStart(rookPos, kingPos[0], kingPos[1]) != null) {
+		    setBoardState(tempBoardState);
+		    
+		    return false;
+		}
+	    }
+	}
+
+	setBoardState(tempBoardState);
+
+	return true;
     }
 
     /**
