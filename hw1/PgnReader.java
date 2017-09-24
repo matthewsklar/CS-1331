@@ -206,8 +206,11 @@ public class PgnReader {
     public static void processMove(String move, char color) {
         char lastChar = move.charAt(move.length() - 1);
 
-        if (lastChar == '+' || lastChar == '#') {
+        while (lastChar == '+' || lastChar == '#'
+               || lastChar == '!' || lastChar == '?') {
             move = move.substring(0, move.length() - 1);
+
+            lastChar = move.charAt(move.length() - 1);
         }
 
         // Castling
@@ -478,10 +481,12 @@ public class PgnReader {
             if (getBoardStateSquare(endFile, endRank).equals("  ")) {
                 for (int[] pos: piecePos) {
                     if (endRank == pos[1] + direction) {
-                        int[] posInfo = {pos[0], pos[1]};
+                        int[] startPos = {pos[0], pos[1]};
                         move("  ", endFile, endRank, endFile, pos[1]);
 
-                        return posInfo;
+                        if (isLegalMove(startPos, endFile, endRank)) {
+                            return startPos;
+                        }
                     }
                 }
 
@@ -489,9 +494,11 @@ public class PgnReader {
 
             for (int[] pos: piecePos) {
                 if (endRank == pos[1] + direction) {
-                    int[] posInfo = {pos[0], pos[1]};
+                    int[] startPos = {pos[0], pos[1]};
 
-                    return posInfo;
+                    if (isLegalMove(startPos, endFile, endRank)) {
+                        return startPos;
+                    }
                 }
             }
         }
@@ -501,9 +508,11 @@ public class PgnReader {
                 int direction = color == 'w' ? 1 : -1;
 
                 if (pos[1] + direction == endRank) {
-                    int[] posInfo = {pos[0], pos[1]};
+                    int[] startPos = {pos[0], pos[1]};
 
-                    return posInfo;
+                    if (isLegalMove(startPos, endFile, endRank)) {
+                        return startPos;
+                    }
                 }
 
                 if (pos[1] + 2 * direction == endRank) {
@@ -520,9 +529,11 @@ public class PgnReader {
                     }
 
                     if (correct) {
-                        int[] posInfo = {pos[0], pos[1]};
+                        int[] startPos = {pos[0], pos[1]};
 
-                        return posInfo;
+                        if (isLegalMove(startPos, endFile, endRank)) {
+                            return startPos;
+                        }
                     }
                 }
             }
@@ -566,9 +577,9 @@ public class PgnReader {
                 if (correct) {
                     int[] startPos = {pos[0], pos[1]};
 
-		    if (isLegalMove(startPos, endFile, endRank)) {
-			return startPos;
-		    }
+                    if (isLegalMove(startPos, endFile, endRank)) {
+                        return startPos;
+                    }
                 }
             }
 
@@ -589,10 +600,10 @@ public class PgnReader {
 
                 if (correct) {
                     int[] startPos = {pos[0], pos[1]};
-		    
-		    if (isLegalMove(startPos, endFile, endRank)) {
-			return startPos;
-		    }
+
+                    if (isLegalMove(startPos, endFile, endRank)) {
+                        return startPos;
+                    }
                 }
             }
         }
@@ -620,17 +631,17 @@ public class PgnReader {
                     && (pos[1] + 2 == endRank || pos[1] - 2 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
 
-		if (isLegalMove(startPos, endFile, endRank)) {
-		    return startPos;
-		}
+                if (isLegalMove(startPos, endFile, endRank)) {
+                    return startPos;
+                }
             } else if ((pos[0] + 2 == endFile || pos[0] - 2 == endFile)
                            && (pos[1] + 1 == endRank
                            || pos[1] - 1 == endRank)) {
                 int[] startPos = {pos[0], pos[1]};
-		
-		if (isLegalMove(startPos, endFile, endRank)) {
-		    return startPos;
-		}
+
+                if (isLegalMove(startPos, endFile, endRank)) {
+                    return startPos;
+                }
             }
         }
 
@@ -654,26 +665,36 @@ public class PgnReader {
 
         for (int[] pos: piecePos) {
             if ((pos[0] + pos[1]) % 2 == bishopColor) {
-                int fDir = (endFile - pos[0]) / Math.abs(endFile - pos[0]);
-                int rDir = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
+                if (endFile - pos[0] != 0 && endRank - pos[1] != 0) {
+                    int fDir = (endFile - pos[0]) / Math.abs(endFile - pos[0]);
+                    int rDir = (endRank - pos[1]) / Math.abs(endRank - pos[1]);
 
-                boolean correct = true;
+                    boolean correct = true;
 
-                for (int i = 0; i < Math.abs(pos[0] - endFile) - 1; i++) {
-                    int file = Math.abs(i + fDir * pos[0] + 1);
-                    int rank = Math.abs(i + rDir * pos[1] + 1);
-
-                    if (!getBoardStateSquare(file, rank).equals("  ")) {
-                        correct = false;
+                    if (Math.abs(pos[0] - endFile) != Math.abs(
+                            pos[1] - endRank)) {
+                        continue;
                     }
-                }
 
-                if (correct) {
-                    int[] startPos = {pos[0], pos[1]};
+                    if (Math.abs(pos[0] - endFile) - 1 != 0) {
+                        for (int i = 0; i < Math.abs(pos[0] - endFile) - 1;
+                                i++) {
+                            int file = Math.abs(i + fDir * pos[0] + 1);
+                            int rank = Math.abs(i + rDir * pos[1] + 1);
 
-		    if (isLegalMove(startPos, endFile, endRank)) {
-			return startPos;
-		    }
+                            if (!getBoardStateSquare(file, rank).equals("  ")) {
+                                correct = false;
+                            }
+                        }
+                    }
+
+                    if (correct) {
+                        int[] startPos = {pos[0], pos[1]};
+
+                        if (isLegalMove(startPos, endFile, endRank)) {
+                            return startPos;
+                        }
+                    }
                 }
             }
         }
@@ -711,41 +732,72 @@ public class PgnReader {
     }
 
     /**
-     * 
+     * Check if the move is legal. It is considered legal if the after
+     * the move the side that moved's king is not in check. This is
+     * done by first creating a save of the board state. After, the
+     * attempted move is done and then all pieces that could possible
+     * capture the king after a piece on the other side is moved
+     * (queen, rook, bishop) check if they can move to the opponent's
+     * king square. If it can, then the move is illegal; otherwise, the
+     * move is legal. After deciding if the move is legal but before
+     * returning the result, the board is reset to the save.
+     *
+     * @param startPos The starting position of the piece checking if
+     *                 it can legally move.
+     * @param endFile The file the piece moves to.
+     * @param endRank The rank the piece moves to.
+     *
+     * @return If the attempted move is legal. It is legal if the piece
+     * to be moved's king is not in check after the move.
      */
-    public static boolean isLegalMove(int[] startPos, int endFile, int endRank) {
-	String[][] tempBoardState = new String[8][8];
+    public static boolean isLegalMove(int[] startPos, int endFile,
+                                      int endRank) {
+        String[][] tempBoardState = new String[8][8];
 
-	for (int r = 0; r < 8; r++) {
-	    for (int f = 0; f < 8; f++) {
-		tempBoardState[r][f] = getBoardStateSquare(f, r);
-	    }
-	}
-	
-	String piecePlusColor = getBoardStateSquare(startPos[0], startPos[1]);
-	char piece = piecePlusColor.charAt(0);
-	char color = piecePlusColor.charAt(1);
-	char oppositeColor = color == 'w' ? 'b' : 'w';
+        for (int r = 0; r < 8; r++) {
+            for (int f = 0; f < 8; f++) {
+                tempBoardState[r][f] = getBoardStateSquare(f, r);
+            }
+        }
 
-	move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
-	
+        String piecePlusColor = getBoardStateSquare(startPos[0], startPos[1]);
+        char piece = piecePlusColor.charAt(0);
+        char color = piecePlusColor.charAt(1);
+        char oppositeColor = color == 'w' ? 'b' : 'w';
+
+        move(piecePlusColor, startPos[0], startPos[1], endFile, endRank);
+
         int[] kingPos = getPiecePositions("K" + color, -1, -1)[0];
 
-	if (kingPos[0] == startPos[0] || kingPos[1] == startPos[1]) {
-	    int[][] rookPos = getPiecePositions("R" + oppositeColor, -1, -1);
-	    
-	    for (int[] rook: rookPos) {
-	        if (getRookStart(rookPos, kingPos[0], kingPos[1]) != null) {
-		    setBoardState(tempBoardState);
-		    
-		    return false;
-		}
-	    }
-	}
+        if (kingPos[0] == startPos[0] || kingPos[1] == startPos[1]) {
+            int[][] rookPos = getPiecePositions("R" + oppositeColor, -1, -1);
 
-	setBoardState(tempBoardState);
+            if (getRookStart(rookPos, kingPos[0], kingPos[1]) != null) {
+                setBoardState(tempBoardState);
 
-	return true;
+                return false;
+            }
+        }
+
+        int[][] bishopPos = getPiecePositions("B" + oppositeColor, -1, -1);
+
+        if (getBishopStart(bishopPos, kingPos[0], kingPos[1]) != null) {
+            setBoardState(tempBoardState);
+
+            return false;
+        }
+
+        int[][] queenPos = getPiecePositions("Q" + oppositeColor, -1, -1);
+
+        if (getQueenStart(queenPos, kingPos[0], kingPos[1]) != null) {
+            setBoardState(tempBoardState);
+
+            return false;
+        }
+
+        setBoardState(tempBoardState);
+
+        return true;
     }
 
     /**
