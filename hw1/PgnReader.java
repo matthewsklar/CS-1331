@@ -164,6 +164,8 @@ public class PgnReader {
     public static void moves(String pgn) {
         pgn = pgn.substring(pgn.lastIndexOf("]"), pgn.length());
 
+        pgn = pgn.replaceAll("[\\t\\n\\r]+", " ");
+
         String pgnMoves = pgn.substring(pgn.indexOf("1."));
 
         int lastMoveIndex = 0;
