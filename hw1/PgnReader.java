@@ -206,10 +206,10 @@ public class PgnReader {
      * @param color The color of the piece moved: 'w' = white; 'b' = black.
      */
     public static void processMove(String move, char color) {
-	if (!Character.isLetter(move.charAt(0))) {
-	    return;
-	}
-	
+        if (!Character.isLetter(move.charAt(0))) {
+            return;
+        }
+
         char lastChar = move.charAt(move.length() - 1);
 
         while (lastChar == '+' || lastChar == '#'
