@@ -1,0 +1,16 @@
+/**
+ * Exception for when an invalid square location is searched for.
+ *
+ * This exception is checked because all squares must have a valid location. If
+ * it was unchecked then it would be possible to not check if the square location
+ * exists, and all squares in a game of chess must have a valid location.
+ *
+ * @author msklar3
+ */
+public class InvalidSquareException extends Exception {
+    public InvalidSquareException(String message) {
+        super(message);
+    }
+}
+
+// TODO: Cleanup
