@@ -31,6 +31,10 @@ public class Square {
      */
     public Square(String name) {
         this(name.charAt(0), name.charAt(1));
+
+        if (name.length() != 2) {
+            throw new InvalidSquareException("" + name);
+        }
     }
 
     /**

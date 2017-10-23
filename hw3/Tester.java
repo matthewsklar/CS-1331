@@ -1,7 +1,7 @@
 public class Tester {
     public static void main(String[] args) {
         try {
-            new Square("a1");
+            new Square("a2");
         } catch (InvalidSquareException e) {
             fail("InvalidSquareException for valid square: " + e.getMessage());
         }
