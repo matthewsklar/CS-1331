@@ -56,13 +56,17 @@ public class Pawn extends Piece {
         int direction = getColor() == Color.WHITE ? 1 : -1;
         int squareCount = 0;
 
-        tempSquares[squareCount++] = new Square(square.getFile(),
-                                                (char) (rank + direction + 48));
+        char nextSquare = (char) (rank + direction + 48);
 
-        if ((getColor() == Color.WHITE && rank == 2)
-                || (getColor() == Color.BLACK && rank == 7)) {
+        if (nextSquare != '0' && nextSquare != '9') {
             tempSquares[squareCount++] = new Square(square.getFile(),
-                (char) (rank + direction * 2 + 48));
+                                                    (char) (nextSquare));
+
+            if ((getColor() == Color.WHITE && rank == 2)
+                    || (getColor() == Color.BLACK && rank == 7)) {
+                tempSquares[squareCount++] = new Square(square.getFile(),
+                    (char) (rank + direction * 2 + 48));
+            }
         }
 
         return trimArray(squareCount, 2, tempSquares);

@@ -5,9 +5,9 @@ public class Tester {
 	Piece bishop = new Bishop(Color.BLACK);
 	Piece knight = new Knight(Color.WHITE);
 	Piece rook = new Rook(Color.WHITE);
-	Piece pawn = new Pawn(Color.BLACK);
+	Piece pawn = new Pawn(Color.WHITE);
 
-	Test(pawn);
+        Test(knight);
     }
 
     public static void Test(Piece p) {
@@ -15,7 +15,9 @@ public class Tester {
 			   "\nA: " + p.algebraicName() +
 			   "\nF: " + p.fenName());
 
-	Square start = new Square("a6");
+	Square start = new Square("h3");
+        Square other = new Square('c', '3');
+        System.out.println(start + ", " + other + ", " + start.equals(other));
 
 	System.out.println("Square: " + start);
 
