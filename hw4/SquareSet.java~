@@ -1,0 +1,8 @@
+/**
+ *
+ */
+public class SquareSet implements Set<Square> {
+    public SquareSet() {
+
+    }
+}
