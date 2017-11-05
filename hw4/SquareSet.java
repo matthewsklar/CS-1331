@@ -34,7 +34,8 @@ public class SquareSet<Square> implements Set<Square> {
         }
 
         /**
-         *
+         * Removes from the underlying collection the last element returned by
+         * this iterator.
          */
         public void remove() {
             // TODO: Check this
@@ -51,11 +52,13 @@ public class SquareSet<Square> implements Set<Square> {
     }
 
     public SquareSet(Collection<Square> c) {
+        elements = new Object[0];
+
+        lastIndex = -1;
+
         for (Square s : c) {
             add(s);
         }
-
-        lastIndex = size() - 1;
     }
 
     /**
@@ -166,6 +169,9 @@ public class SquareSet<Square> implements Set<Square> {
         return containsAll(c);*/
     }
 
+    /**
+     *
+     */
     public int hashCode() {
         return 0;
     }
@@ -180,7 +186,9 @@ public class SquareSet<Square> implements Set<Square> {
     }
 
     /**
+     * Returns an iterator over the elements in this set.
      *
+     * @return an iterator over the elements in this set
      */
     public Iterator<Square> iterator() {
         return new SquareSetIterator();
@@ -250,6 +258,9 @@ public class SquareSet<Square> implements Set<Square> {
         return true;
     }
 
+    /**
+     *
+     */
     public boolean addAll(Collection<? extends Square> c) {
         return true;
     }
