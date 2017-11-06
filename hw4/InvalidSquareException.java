@@ -9,6 +9,11 @@
  * @since 1.1
  */
 public class InvalidSquareException extends RuntimeException {
+    /**
+     * Constructor for InvalidSquareException
+     *
+     * @param message message to be added to this set
+     */
     public InvalidSquareException(String message) {
         super(message);
     }

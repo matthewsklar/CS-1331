@@ -1,13 +1,17 @@
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Iterator;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
- *
+ * Represents a set of Squares.
  *
  * @author msklar3
  * @version 1.2
  * @since 1.2
  */
-public class SquareSet<Square> implements Set<Square> {
+public class SquareSet implements Set<Square> {
     private class SquareSetIterator implements Iterator<Square> {
         private int index = 0;
 
@@ -24,6 +28,7 @@ public class SquareSet<Square> implements Set<Square> {
          * Get the next element in the iteration.
          *
          * @return the next element in the iteration
+         * @throws NoSuchElementException if the iteration has no more elements
          */
         public Square next() {
             if (!hasNext()) {
@@ -38,19 +43,26 @@ public class SquareSet<Square> implements Set<Square> {
          * this iterator.
          */
         public void remove() {
-            // TODO: Check this
-            SquareSet.this.remove(get(index - 1));
+            SquareSet.this.remove(get(index--));
         }
     }
 
     private Object[] elements;
     private int lastIndex;
 
+    /**
+     * Constructor for SquareSet
+     */
     public SquareSet() {
         elements = new Object[0];
         lastIndex = -1;
     }
 
+    /**
+     * Constructor for SquareSet
+     *
+     * @param c collection of squares to initiate set with
+     */
     public SquareSet(Collection<Square> c) {
         elements = new Object[0];
 
@@ -66,6 +78,7 @@ public class SquareSet<Square> implements Set<Square> {
      *
      * @param index index of the square to get
      * @return the square at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     public Square get(int index) {
         if (index < 0 || index > lastIndex) {
@@ -90,6 +103,8 @@ public class SquareSet<Square> implements Set<Square> {
      *
      * @param s square to be added to this set
      * @return true if the square is added to this set
+     * @throws NullPointerException if the specified element is null
+     * @throws InvalidSquareException if the square is invalid
      */
     public boolean add(Square s) {
         if (s == null) {
@@ -100,9 +115,48 @@ public class SquareSet<Square> implements Set<Square> {
             return false;
         }
 
+        int file = s.getFile();
+        int rank = s.getRank();
+
+        if (!(file >= (int) 'a' && file <= (int) 'h'
+              && rank > (int) '0' && rank < (int) '9')) {
+            throw new InvalidSquareException("" + file + rank);
+        }
+
         elements = Arrays.copyOf(elements, size() + 1);
 
         set(++lastIndex, s);
+
+        return true;
+    }
+
+    /**
+     * Adds all the elements in the specified collection to this set if
+     * they are not already present.
+     *
+     * @param c collection containing elements to be added to this set
+     * @return true if this set changed as a result of the call
+     * @throws InvalidSquareException if the collection contains an invalid
+     *         square
+     */
+    public boolean addAll(Collection<? extends Square> c) {
+        if (containsAll(c)) {
+            return false;
+        }
+
+        for (Square s : c) {
+            int file = s.getFile();
+            int rank = s.getRank();
+
+            if (!(file >= (int) 'a' && file <= (int) 'h'
+                  && rank > (int) '0' && rank < (int) '9')) {
+                throw new InvalidSquareException("" + file + rank);
+            }
+        }
+
+        for (Square s : c) {
+            add(s);
+        }
 
         return true;
     }
@@ -146,13 +200,7 @@ public class SquareSet<Square> implements Set<Square> {
      * @return true if the specified object is equal to this set
      */
     public boolean equals(Object o) {
-        Collection c = (Collection) o;
-
-        return containsAll(c) && c.containsAll(this);
-
-        // TODO: Check which implementation works
-
-        /*if (o == this) {
+        if (o == this) {
             return true;
         }
 
@@ -166,14 +214,22 @@ public class SquareSet<Square> implements Set<Square> {
             return false;
         }
 
-        return containsAll(c);*/
+        return containsAll(c);
     }
 
     /**
+     * Returns the hash code value for this set.
      *
+     * @return the hash code for this set
      */
     public int hashCode() {
-        return 0;
+        int hash = 0;
+
+        for (Object s : elements) {
+            hash += ((Square) s).hashCode();
+        }
+
+        return hash;
     }
 
     /**
@@ -213,10 +269,51 @@ public class SquareSet<Square> implements Set<Square> {
     }
 
     /**
+     * Returns an array containing all of the elements in this set;
+     * the runtime type of the returned array is that of the specified
+     * array. If the set fits in the specified array, it is returned
+     * therein. Otherwise, a new array is allocated with the runtime
+     * type of the specified array and the size of this set. Null is
+     * added to the end as filler.
      *
+     * @param <T> the runtime type of the array containing the collection
+     * @param t the array into which the elements of this set are to be
+     *        stored, if it is big enough; otherwise, a new array of
+     *        the same runtime type is allocated for this purpose
+     * @return an array containing all the elements in this set
+     * @throws NullPointerException if the specified array is null
+     * @throws ArrayStoreException if the runtime type of the specifed
+     *         array is not a supertype of the runtime of every element
+     *         in this set
      */
     public <T> T[] toArray(T[] t) {
-        return null;
+        if (t == null) {
+            throw new NullPointerException();
+        }
+
+        if (t instanceof Object[]) {
+            if (t.length > lastIndex) {
+                for (int i = 0; i <= lastIndex; i++) {
+                    t[i] = (T) get(i);
+                }
+
+                for (int i = lastIndex + 1; i < t.length; i++) {
+                    t[i] = null;
+                }
+
+                return t;
+            } else {
+                Square[] squares = new Square[lastIndex + 1];
+
+                for (int i = 0; i <= lastIndex; i++) {
+                    squares[i] = get(i);
+                }
+
+                return (T[]) squares;
+            }
+        } else {
+            throw new ArrayStoreException();
+        }
     }
 
     /**
@@ -243,8 +340,17 @@ public class SquareSet<Square> implements Set<Square> {
         return false;
     }
 
+    /**
+     * Removes from this set all of its elements that are contained in
+     * the specified collection.
+     *
+     * @param c collection containing elements to be removed from this set
+     * @return true if this set changed as a result of the call
+     * @throw UnsupportedOperationException if the removeAll operation is
+     *        not supported by this set
+     */
     public boolean removeAll(Collection<?> c) {
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -252,16 +358,19 @@ public class SquareSet<Square> implements Set<Square> {
      */
     public void clear() {
         elements = new Object[0];
-    }
-
-    public boolean retainAll(Collection<?> c) {
-        return true;
+        lastIndex = -1;
     }
 
     /**
+     * Retains only the elements in this set that are contained
+     * in the specified collection.
      *
+     * @param c collection containing elements to be retained in this set
+     * @return true if this set changed as a result of the call
+     * @throws UnsupportedOperationException if the retainAll operation
+     *         is not supported by this set
      */
-    public boolean addAll(Collection<? extends Square> c) {
-        return true;
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
     }
 }

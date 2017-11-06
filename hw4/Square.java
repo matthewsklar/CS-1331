@@ -94,4 +94,14 @@ public class Square {
 
         return (getFile() == that.getFile() && getRank() == that.getRank());
     }
+
+    /**
+     * Returns the hash code value for this Square.
+     *
+     * @return the hash code for this Square
+     */
+    @Override
+    public int hashCode() {
+        return 10 * (int) getFile() + (int) getRank();
+    }
 }
