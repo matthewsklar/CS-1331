@@ -61,7 +61,7 @@ public class SquareSet implements Set<Square> {
     /**
      * Constructor for SquareSet
      *
-     * @param c collection of squares to initiate set with
+     * @param c collection of squares to  initiate set with
      */
     public SquareSet(Collection<Square> c) {
         elements = new Object[0];
