@@ -24,7 +24,7 @@ public class Move {
      *
      * @return whitePly
      */
-    public Ply whitePly() {
+    public Ply getWhitePly() {
         return whitePly;
     }
 
@@ -33,7 +33,7 @@ public class Move {
      *
      * @return blackPly
      */
-    public Ply blackPly() {
+    public Ply getBlackPly() {
         return blackPly;
     }
 }

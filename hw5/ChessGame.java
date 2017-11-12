@@ -13,14 +13,27 @@ public class ChessGame {
     private class PiecePredicate implements Predicate<Move> {
         private Piece p;
 
+        /**
+         * Constructor for PiecePredicate.
+         *
+         * @param p piece to test
+         */
         public PiecePredicate(Piece p) {
             this.p = p;
         }
 
+        /**
+         * Test if the move contains the piece.
+         *
+         * @param move move to check for piece in
+         * @return true if the move contains the specified piece
+         */
         @Override
         public boolean test(Move move) {
-            return move.whitePly().getPiece() == p
-                || move.blackPly().getPiece() == p;
+            return move.getWhitePly().getPiece().algebraicName()
+                .equals(p.algebraicName())
+                || move.getBlackPly().getPiece().algebraicName()
+                .equals(p.algebraicName());
         }
     }
 
@@ -73,8 +86,8 @@ public class ChessGame {
      */
     public List<Move> getMovesWithComment() {
         return filter((Move move) -> {
-                return move.whitePly().getComment().isPresent()
-                    || move.blackPly().getComment().isPresent();
+                return move.getWhitePly().getComment().isPresent()
+                    || move.getBlackPly().getComment().isPresent();
             });
     }
 
@@ -87,8 +100,8 @@ public class ChessGame {
     public List<Move> getMovesWithoutComment() {
         return filter(new Predicate<Move>() {
                 public boolean test(Move move) {
-                    return !move.whitePly().getComment().isPresent()
-                        && !move.blackPly().getComment().isPresent();
+                    return !move.getWhitePly().getComment().isPresent()
+                        && !move.getBlackPly().getComment().isPresent();
                 }
             });
     }
