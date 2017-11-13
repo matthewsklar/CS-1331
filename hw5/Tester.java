@@ -138,8 +138,8 @@ public class Tester {
                && cg.getMovesWithPiece(new Queen(Color.WHITE)).contains(move3)
                && cg.getMovesWithPiece(new Knight(Color.WHITE)).size() == 1
                && cg.getMovesWithPiece(new Knight(Color.WHITE)).contains(move2)
-               && cg.getMovesWithPiece(new Bishop(Color.WHITE)).size() == 1
-               && cg.getMovesWithPiece(new Bishop(Color.WHITE)).contains(move1),
+               && cg.getMovesWithPiece(new Bishop(Color.BLACK)).size() == 1
+               && cg.getMovesWithPiece(new Bishop(Color.BLACK)).contains(move1),
                "ChessGame.getMovesWithPiece(Piece)");
     }
 
@@ -528,5 +528,4 @@ public class Tester {
                                + " " + Arrays.deepToString(a2));
         }
         return output;
-    }
-}
+    }}
