@@ -3,12 +3,17 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Button;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 /**
  *
@@ -16,7 +21,9 @@ import javafx.collections.FXCollections;
 public class ChessGui extends Application {
     private ChessDb chessDb;
     private TableView<ChessGame> gameView;
+    private ListView<String> moveView;
     private ObservableList<ChessGame> gameData;
+    private ObservableList<String> moveData;
 
     /**
      *
@@ -25,9 +32,9 @@ public class ChessGui extends Application {
     public void start(Stage stage) {
         chessDb = new ChessDb();
         gameView = new TableView<>();
+        moveView = new ListView<>();
         gameData = FXCollections.observableArrayList();
-
-        gameView.setEditable(true);
+        moveData = FXCollections.observableArrayList();
 
         TableColumn eventColumn = new TableColumn("Event");
         eventColumn.setMaxWidth(250);
@@ -53,9 +60,7 @@ public class ChessGui extends Application {
         resultColumn.setCellValueFactory(new PropertyValueFactory<>("result"));
 
         for (ChessGame game : chessDb.getGames()) {
-            gameData.add(new ChessGame(game.getEvent(), game.getSite(),
-                                       game.getDate(), game.getWhite(),
-                                       game.getBlack(), game.getResult()));
+            gameData.add(game);
         }
 
         gameView.setItems(gameData);
@@ -65,9 +70,55 @@ public class ChessGui extends Application {
         Button viewButton = new Button();
         viewButton.setText("View Game");
         viewButton.setDisable(true);
+        viewButton.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    moveView.setItems(moveData);
+
+                    HBox hBox = new HBox();
+                    hBox.getChildren().addAll(moveView);
+
+                    Stage moveStage = new Stage();
+                    Scene scene = new Scene(hBox);
+                    moveStage.setScene(scene);
+                    moveStage.show();
+                }
+            });
+
+        final ObservableList<TablePosition> selectedCells =
+            gameView.getSelectionModel().getSelectedCells();
+
+        selectedCells.addListener(new ListChangeListener<TablePosition>() {
+                @Override
+                public void onChanged(Change change) {
+                    moveData.clear();
+
+                    for (TablePosition pos : selectedCells) {
+                        int i = 1;
+                        boolean done = false;
+
+                        while (!done) {
+                            try {
+                                moveData.add(gameData.get(pos.getRow())
+                                             .getMove(i++));
+                            } catch (IndexOutOfBoundsException e) {
+                                done = true;
+                            }
+                        }
+                    }
+
+                    viewButton.setDisable(false);
+                }
+            });
 
         Button dismissButton = new Button();
         dismissButton.setText("Dismiss");
+        dismissButton.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    System.exit(0);
+                }
+            });
 
         HBox buttonHBox = new HBox();
         buttonHBox.getChildren().addAll(viewButton, dismissButton);
