@@ -16,7 +16,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 /**
+ * Create the GUI for the program.
  *
+ * @author msklar3
+ * @version 1.4
+ * @since 1.4
  */
 public class ChessGui extends Application {
     private ChessDb chessDb;
@@ -26,7 +30,7 @@ public class ChessGui extends Application {
     private ObservableList<String> moveData;
 
     /**
-     *
+     * Run when the application starts. Creates the GUI.
      */
     @Override
     public void start(Stage stage) {
