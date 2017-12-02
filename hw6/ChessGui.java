@@ -6,6 +6,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Button;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -72,22 +73,6 @@ public class ChessGui extends Application {
                                      whiteColumn, blackColumn, resultColumn);
 
         Button viewButton = new Button();
-        viewButton.setText("View Game");
-        viewButton.setDisable(true);
-        viewButton.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    moveView.setItems(moveData);
-
-                    HBox hBox = new HBox();
-                    hBox.getChildren().addAll(moveView);
-
-                    Stage moveStage = new Stage();
-                    Scene scene = new Scene(hBox);
-                    moveStage.setScene(scene);
-                    moveStage.show();
-                }
-            });
 
         final ObservableList<TablePosition> selectedCells =
             gameView.getSelectionModel().getSelectedCells();
@@ -112,6 +97,39 @@ public class ChessGui extends Application {
                     }
 
                     viewButton.setDisable(false);
+                }
+            });
+
+        viewButton.setText("View Game");
+        viewButton.setDisable(true);
+        viewButton.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    ChessGame game;
+                    String labelData = "";
+
+                    for (TablePosition pos : selectedCells) {
+                        game = gameData.get(pos.getRow());
+
+                        labelData += game.getEvent() + "\n" + game.getSite()
+                            + "\n" + game.getDate() + "\n" + game.getWhite()
+                            + "\n" + game.getBlack() + "\n" + game.getResult();
+                    }
+
+                    Label metadata = new Label(labelData);
+
+                    moveView.setItems(moveData);
+
+                    HBox hBox = new HBox();
+                    hBox.getChildren().addAll(moveView);
+
+                    VBox vBox = new VBox();
+                    vBox.getChildren().addAll(metadata, hBox);
+
+                    Stage moveStage = new Stage();
+                    Scene scene = new Scene(vBox);
+                    moveStage.setScene(scene);
+                    moveStage.show();
                 }
             });
 
